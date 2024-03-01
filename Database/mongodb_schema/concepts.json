@@ -1,0 +1,19 @@
+[
+  {
+    "id": 0,
+    "skill_name": "Circuit Analysis",
+    "description": "Finding voltages in a circuit",
+    // related skills
+    "skills": [
+
+    ],
+    // related courses
+    "courses": [
+      
+    ], 
+    // links to relavent information
+    "links": [
+
+    ]
+  }
+]

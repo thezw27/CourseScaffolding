@@ -1,0 +1,29 @@
+[
+  {
+    "id": 1,
+    "department_code": "ECSE",
+    "course_code": "2010",
+    "course_name": "Electric Circuits",
+    "description": "A course",
+    // prereq class ids
+    "prereqs": [
+      
+    ],
+    // coreq class ids
+    "coreqs": [
+
+    ],
+    // classes that require given class
+    "followups": [
+
+    ],
+    // skill ids
+    "skills": [
+
+    ],
+    // concept ids
+    "concepts": [
+
+    ]
+  }
+]

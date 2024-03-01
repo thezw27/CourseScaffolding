@@ -1,0 +1,1 @@
+This is a proof of concept frontend, showing off a possible structure for linking courses 
