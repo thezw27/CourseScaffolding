@@ -1,0 +1,5 @@
+2:I[7831,[],""]
+3:I[7765,["600","static/chunks/600-ba26d04637c48c19.js","931","static/chunks/app/page-f3adc546077efdc2.js"],""]
+0:["LrsfHAE_Q-ghhJ-4K-m4G",[[["",{"children":["__PAGE__",{}]},"$undefined","$undefined",true],["",{"children":["__PAGE__",{},["$L1",["$","$L2",null,{"propsForComponent":{"params":{}},"Component":"$3","isStaticGeneration":true}],null]]},[null,["$","html",null,{"lang":"en","children":["$","body",null,{"children":["$","$L3",null,{}]}]}],null]],[[["$","link","0",{"rel":"stylesheet","href":"/_next/static/css/759482d8c7095409.css","precedence":"next","crossOrigin":""}]],"$L4"]]]]
+4:[["$","meta","0",{"name":"viewport","content":"width=device-width, initial-scale=1"}],["$","meta","1",{"charSet":"utf-8"}]]
+1:null

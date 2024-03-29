@@ -1,4 +1,4 @@
-//All concept API calls
+//All API calls
 
 const express = require('express');
 const app = express.Router();
@@ -7,7 +7,6 @@ const bodyParser = require('body-parser');
 const urlencodedParser = bodyParser.urlencoded({ extended: false });
 
 require('dotenv').config();
-const DB_PASS = process.env.DB_PASS;
 const MONGO = process.env.MONGO;
 
 const conceptSchema = new mongoose.Schema({
@@ -52,7 +51,7 @@ const Skill = mongoose.model('Skill', skillsSchema);
 
 app.get('/concepts', async (req, res) => {
 
-  await mongoose.connect(`mongodb+srv://user:${DB_PASS}@coursescaffold.tgx9pev.mongodb.net/scaffold?retryWrites=true&w=majority&appName=CourseScaffold`);
+  await mongoose.connect(MONGO);
 
   try {
     const data = await Concept.find({});
@@ -62,7 +61,7 @@ app.get('/concepts', async (req, res) => {
     console.log(err);
   }
   
-  mongoose.connection.close();
+  await mongoose.connection.close();
 })
 
 app.post('/concepts', urlencodedParser, async (req, res) => {
@@ -74,7 +73,7 @@ app.post('/concepts', urlencodedParser, async (req, res) => {
   const courses = req.body.courses;
   const links = req.body.links;
 
-  await mongoose.connect(`mongodb+srv://user:${DB_PASS}@coursescaffold.tgx9pev.mongodb.net/scaffold?retryWrites=true&w=majority&appName=CourseScaffold`);
+  await mongoose.connect(MONGO);
 
   try {
     const concept = new Concept({
@@ -97,7 +96,6 @@ app.post('/concepts', urlencodedParser, async (req, res) => {
 
 app.put('/concepts', urlencodedParser, async (req, res) => {
   
-  const id = req.body.id;
   const name = req.body.name;
   const desc = req.body.desc;
   const skills = req.body.skills;
@@ -106,9 +104,21 @@ app.put('/concepts', urlencodedParser, async (req, res) => {
 
   await mongoose.connect(MONGO);
 
-  await Concept.updateMany({}, {
-    
-  })
+  try {
+    await Concept.updateMany({}, {
+      "concept_name": name,
+      "description": desc,
+      "skills": skills,
+      "courses": courses,
+      "links": links
+    })
+    res.status(200);
+    res.send({"Message": "Successfully updated!"});
+  } catch (err) {
+    console.log(err);
+    res.status(500);
+    res.send({"Message": "Error: " + err})
+  }
 
   mongoose.connection.close();
 })
@@ -141,7 +151,7 @@ app.get('/concepts/:id', async (req, res) => {
   
   const id = req.params.id;
 
-  await mongoose.connect(`mongodb+srv://user:${DB_PASS}@coursescaffold.tgx9pev.mongodb.net/scaffold?retryWrites=true&w=majority&appName=CourseScaffold`);
+  await mongoose.connect(MONGO);
   
   try {
     const data = await Concept.find({"id": id});
@@ -160,8 +170,34 @@ app.post('/concepts/:id', (req, res) => {
   res.send({"Message":"Method Not Allowed"});
 })
 
-app.put('/concepts/:id', (req, res) => {
+app.put('/concepts/:id', urlencodedParser, async (req, res) => {
 
+  const id = req.params.id;
+  const name = req.body.name;
+  const desc = req.body.desc;
+  const skills = req.body.skills;
+  const courses = req.body.courses;
+  const links = req.body.links;
+
+  await mongoose.connect(MONGO);
+
+  try {
+    await Concept.updateOne({"id": id}, {
+      "concept_name": name,
+      "description": desc,
+      "skills": skills,
+      "courses": courses,
+      "links": links
+    })
+    res.status(200);
+    res.send({"Message": "Successfully updated!"});
+  } catch (err) {
+    console.log(err);
+    res.status(500);
+    res.send({"Message": "Error: " + err})
+  }
+
+  mongoose.connection.close();
 })
 
 app.delete('/concepts/:id', async (req, res) => {
@@ -192,7 +228,7 @@ app.delete('/concepts/:id', async (req, res) => {
 
 app.get('/courses', async (req, res) => {
 
-  await mongoose.connect(`mongodb+srv://user:${DB_PASS}@coursescaffold.tgx9pev.mongodb.net/scaffold?retryWrites=true&w=majority&appName=CourseScaffold`);
+  await mongoose.connect(MONGO);
   
   try {
     const data = await Course.find({});
@@ -202,7 +238,7 @@ app.get('/courses', async (req, res) => {
     console.log(err);
   }
   
-  mongoose.connection.close();
+  //await mongoose.connection.close();
 })
 
 app.post('/courses', async (req, res) => {
@@ -243,8 +279,43 @@ app.post('/courses', async (req, res) => {
   mongoose.connection.close();
 })
 
-app.put('/courses', (req, res) => {
+app.put('/courses', urlencodedParser, async (req, res) => {
+  
+  const depcode = req.body.depcode;
+  const coursecode = req.body.coursecode;
+  const name = req.body.name;
+  const desc = req.body.desc;
+  const prereq = req.body.prereq;
+  const coreq = req.body.coreqs;
+  const followups = req.body.followups;
+  const skills = req.body.skills;
+  const concepts = req.body.courses;
 
+  await mongoose.connect(MONGO);
+
+  try {
+    await Course.updateMany({}, {
+      "department_code": depcode,
+      "course_code": coursecode,
+      "course_name": name,
+      "description": desc,
+      "prereqs": prereq,
+      "coreqs": coreq,
+      "followups": followups,
+      "skills": skills,
+      "concepts": concepts
+    })
+    
+    res.status(200);
+    res.send({"Message": "Successfully updated!"});
+
+  } catch (err) {
+    console.log(err);
+    res.status(500);
+    res.send({"Message": "Error: " + err})
+  }
+
+  mongoose.connection.close();
 })
 
 app.delete('/courses', async (req, res) => {
@@ -274,7 +345,7 @@ app.get('/courses/:id', async (req, res) => {
 
   const id = req.params.id;
 
-  await mongoose.connect(`mongodb+srv://user:${DB_PASS}@coursescaffold.tgx9pev.mongodb.net/scaffold?retryWrites=true&w=majority&appName=CourseScaffold`);
+  await mongoose.connect(MONGO);
 
   try {
     const data = await Course.find({"id": id});
@@ -293,8 +364,44 @@ app.post('/courses/:id', (req, res) => {
   res.send({"Message":"Method Not Allowed"});  
 })
 
-app.put('/courses/:id', (req, res) => {
+app.put('/courses/:id', urlencodedParser, async (req, res) => {
+  
+  const id = req.params.id;
+  const depcode = req.body.depcode;
+  const coursecode = req.body.coursecode;
+  const name = req.body.name;
+  const desc = req.body.desc;
+  const prereq = req.body.prereq;
+  const coreq = req.body.coreqs;
+  const followups = req.body.followups;
+  const skills = req.body.skills;
+  const concepts = req.body.courses;
 
+  await mongoose.connect(MONGO);
+
+  try {
+    await Course.updateOne({"id": id}, {
+      "department_code": depcode,
+      "course_code": coursecode,
+      "course_name": name,
+      "description": desc,
+      "prereqs": prereq,
+      "coreqs": coreq,
+      "followups": followups,
+      "skills": skills,
+      "concepts": concepts
+    })
+    
+    res.status(200);
+    res.send({"Message": "Successfully updated!"});
+    
+  } catch (err) {
+    console.log(err);
+    res.status(500);
+    res.send({"Message": "Error: " + err})
+  }
+
+  mongoose.connection.close();
 })
 
 app.delete('/courses/:id', async (req, res) => {
@@ -325,7 +432,7 @@ app.delete('/courses/:id', async (req, res) => {
 
 app.get('/skills', async (req, res) => {
 
-  await mongoose.connect(`mongodb+srv://user:${DB_PASS}@coursescaffold.tgx9pev.mongodb.net/scaffold?retryWrites=true&w=majority&appName=CourseScaffold`);
+  await mongoose.connect(MONGO);
   
   try {
     const data = await Skill.find({});
@@ -347,7 +454,7 @@ app.post('/skills', async (req, res) => {
   const courses = req.body.courses;
   const links = req.body.links;
 
-  await mongoose.connect(`mongodb+srv://user:${DB_PASS}@coursescaffold.tgx9pev.mongodb.net/scaffold?retryWrites=true&w=majority&appName=CourseScaffold`);
+  await mongoose.connect(MONGO);
 
   try {
     const skill = new Skill({
@@ -368,8 +475,37 @@ app.post('/skills', async (req, res) => {
   mongoose.connection.close();
 })
 
-app.put('/skills', (req, res) => {
+app.put('/skills', urlencodedParser, async (req, res) => {
+  
+  const id = req.params.id;
+  const name = req.body.name;
+  const desc = req.body.desc;
+  const concepts = req.body.concepts;
+  const courses = req.body.courses;
+  const links = req.body.links;
 
+  await mongoose.connect(MONGO);
+
+  try {
+    await Course.updateMany({}, {
+      "id": id,
+      "skill_name": name,
+      "description": desc,
+      "concepts": concepts,
+      "courses": courses,
+      "links": links
+    })
+    
+    res.status(200);
+    res.send({"Message": "Successfully updated!"});
+    
+  } catch (err) {
+    console.log(err);
+    res.status(500);
+    res.send({"Message": "Error: " + err})
+  }
+
+  mongoose.connection.close();
 })
 
 app.delete('/skills', async (req, res) => {
@@ -399,7 +535,7 @@ app.get('/skills/:id', async (req, res) => {
 
   const id = req.params.id;
 
-  await mongoose.connect(`mongodb+srv://user:${DB_PASS}@coursescaffold.tgx9pev.mongodb.net/scaffold?retryWrites=true&w=majority&appName=CourseScaffold`);
+  await mongoose.connect(MONGO);
   
   try {
     const data = await Skill.find({"id": id});
@@ -418,8 +554,37 @@ app.post('/skills/:id', (req, res) => {
   res.send({"Message":"Method Not Allowed"});
 })
 
-app.put('/skills/:id', (req, res) => {a
+app.put('/skills/:id', urlencodedParser, async (req, res) => {
+  
+  const id = req.params.id;
+  const name = req.body.name;
+  const desc = req.body.desc;
+  const concepts = req.body.concepts;
+  const courses = req.body.courses;
+  const links = req.body.links;
 
+  await mongoose.connect(MONGO);
+
+  try {
+    await Skill.updateOne({"id": id}, {
+      "id": id,
+      "skill_name": name,
+      "description": desc,
+      "concepts": concepts,
+      "courses": courses,
+      "links": links
+    })
+    
+    res.status(200);
+    res.send({"Message": "Successfully updated!"});
+    
+  } catch (err) {
+    console.log(err);
+    res.status(500);
+    res.send({"Message": "Error: " + err})
+  }
+
+  mongoose.connection.close();
 })
 
 app.delete('/skills/:id', async (req, res) => {
@@ -441,6 +606,4 @@ app.delete('/skills/:id', async (req, res) => {
   mongoose.connection.close();
 
 })
-
-
 module.exports = app;
