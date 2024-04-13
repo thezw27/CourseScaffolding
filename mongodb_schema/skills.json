@@ -1,0 +1,22 @@
+[
+  {
+    "id": 0,
+    "skill_name": "Laplace transforms",
+    "description": "Math",
+    // related concepts
+    "concepts": [
+
+    ],
+    // related courses
+    "courses": [
+      
+    ], 
+    // links to relavent information
+    "links": [
+      {
+        "name": "Wikipedia",
+        "link": "wikipedia.com"
+      }
+    ]
+  }
+]
