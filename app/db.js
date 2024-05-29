@@ -3,8 +3,8 @@
 const express = require('express');
 const app = express.Router();
 const mongoose = require('mongoose');
-const bodyParser = require('body-parser');
-const urlencodedParser = bodyParser.urlencoded({ extended: false });
+
+app.use(express.json());
 
 require('dotenv').config();
 const MONGO = process.env.MONGO;
@@ -68,7 +68,7 @@ app.get('/concepts', async (req, res) => {
   ;
 })
 
-app.post('/concepts', urlencodedParser, async (req, res) => {
+app.post('/concepts', async (req, res) => {
 
   const id = req.body.id;
   const name = req.body.name;
@@ -89,7 +89,7 @@ app.post('/concepts', urlencodedParser, async (req, res) => {
       "links": links
     })
     await concept.save();
-    res.status("201");
+    res.status(201);
     res.send({"Message": "Success!"});
   } catch (err) {
     //console.log(err);
@@ -98,7 +98,7 @@ app.post('/concepts', urlencodedParser, async (req, res) => {
   ;
 })
 
-app.put('/concepts', urlencodedParser, async (req, res) => {
+app.put('/concepts',  async (req, res) => {
   
   const name = req.body.name;
   const desc = req.body.desc;
@@ -174,7 +174,7 @@ app.post('/concepts/:id', (req, res) => {
   res.send({"Message":"Method Not Allowed"});
 })
 
-app.put('/concepts/:id', urlencodedParser, async (req, res) => {
+app.put('/concepts/:id',  async (req, res) => {
 
   const id = req.params.id;
   const name = req.body.name;
@@ -245,7 +245,9 @@ app.get('/courses', async (req, res) => {
   ;
 })
 
-app.post('/courses', async (req, res) => {
+app.post('/courses',  async (req, res) => {
+
+  console.log(req.body);
 
   const id = req.body.id;
   const depcode = req.body.depcode;
@@ -274,7 +276,7 @@ app.post('/courses', async (req, res) => {
       "concepts": concepts
     })
     await course.save();
-    res.status("201");
+    res.status(201);
     res.send({"Message": "Success!"});
   } catch (err) {
     //console.log(err);
@@ -283,7 +285,7 @@ app.post('/courses', async (req, res) => {
   ;
 })
 
-app.put('/courses', urlencodedParser, async (req, res) => {
+app.put('/courses',  async (req, res) => {
   
   const depcode = req.body.depcode;
   const coursecode = req.body.coursecode;
@@ -368,7 +370,7 @@ app.post('/courses/:id', (req, res) => {
   res.send({"Message":"Method Not Allowed"});  
 })
 
-app.put('/courses/:id', urlencodedParser, async (req, res) => {
+app.put('/courses/:id',  async (req, res) => {
   
   const id = req.params.id;
   const depcode = req.body.depcode;
@@ -470,7 +472,7 @@ app.post('/skills', async (req, res) => {
       "links": links
     })
     await skill.save();
-    res.status("201");
+    res.status(201);
     res.send({"Message": "Success!"});
   } catch (err) {
     //console.log(err);
@@ -479,7 +481,7 @@ app.post('/skills', async (req, res) => {
   ;
 })
 
-app.put('/skills', urlencodedParser, async (req, res) => {
+app.put('/skills',  async (req, res) => {
   
   const id = req.params.id;
   const name = req.body.name;
@@ -558,7 +560,7 @@ app.post('/skills/:id', (req, res) => {
   res.send({"Message":"Method Not Allowed"});
 })
 
-app.put('/skills/:id', urlencodedParser, async (req, res) => {
+app.put('/skills/:id',  async (req, res) => {
   
   const id = req.params.id;
   const name = req.body.name;

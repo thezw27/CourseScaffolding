@@ -3,7 +3,7 @@ import Admin from '../../components/admin';
 
 export default async function Page() {
   const data = await getData();
-
+  console.log(data);
   return (
     <Admin data={data} />
   )
@@ -20,7 +20,7 @@ async function getData() {
     const sdata = await sresp.json();
     const codata = await coresp.json();
 
-    
+    console.log(sresp);
     return [cdata, sdata, codata]
   } catch (err) {
     console.log(err);
