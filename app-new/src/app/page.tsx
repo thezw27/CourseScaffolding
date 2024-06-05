@@ -5,7 +5,7 @@ import React from 'react';
 
 export default async function Home() {
 
-  const data = await fetchAll();
+  const data  = await fetchAll();
 
   return (
     <main className="flex min-h-screen items-center justify-between p-24">
@@ -19,7 +19,7 @@ const fetchAll = async () => {
   const DB_URL = 'http://localhost:3000/db/courses';
 
   try {
-    const resp = await fetch(DB_URL)
+    const resp = await fetch(DB_URL, {cache: 'no-cache'});
     if (!resp.ok) {
       console.log(resp);
       throw new Error('Fetch Failed.');
@@ -32,6 +32,11 @@ const fetchAll = async () => {
         department_code, 
         course_code, 
         course_name
+      } : {
+        id : string,
+        department_code : string,
+        course_code : number,
+        course_name : string
       }
     ) => (
       {

@@ -10,17 +10,17 @@ require('dotenv').config();
 const MONGO = process.env.MONGO;
 
 const conceptSchema = new mongoose.Schema({
-  id: Number,
+  id: String,
   concept_name: String,
   description: String,
-  skillss: [Number],
+  skills: [Number],
   courses: [Number],
   links: [String]
 });
 const Concept = mongoose.model('Concept', conceptSchema);
 
 const coursesSchema = new mongoose.Schema({
-  id: Number,
+  id: String,
   department_code: String,
   course_code: String,
   course_name: String,
@@ -34,7 +34,7 @@ const coursesSchema = new mongoose.Schema({
 const Course = mongoose.model('Course', coursesSchema);
 
 const skillsSchema = new mongoose.Schema({
-  id: Number,
+  id: String,
   skill_name: String,
   description: String,
   concepts: [Number],
