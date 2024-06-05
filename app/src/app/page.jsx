@@ -18,7 +18,7 @@ const fetchAll = async () => {
   const DB_URL = 'http://localhost:3000/db/courses';
 
   try {
-    const resp = await fetch(DB_URL)
+    const resp = await fetch(DB_URL, {cache: "no-cache"})
     if (!resp.ok) {
       throw new Error('Fetch Failed.');
     }

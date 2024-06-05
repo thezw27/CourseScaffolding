@@ -12,9 +12,9 @@ export default async function Page() {
 async function getData() {
 
   try {
-    const cresp = await fetch('http://localhost:3000/db/courses');
-    const sresp = await fetch('http://localhost:3000/db/skills');
-    const coresp = await fetch('http://localhost:3000/db/concepts');
+    const cresp = await fetch('http://localhost:3000/db/courses', {cache: "no-cache"});
+    const sresp = await fetch('http://localhost:3000/db/skills', {cache: "no-cache"});
+    const coresp = await fetch('http://localhost:3000/db/concepts', {cache: "no-cache"});
     
     const cdata = await cresp.json();
     const sdata = await sresp.json();

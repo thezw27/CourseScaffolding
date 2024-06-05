@@ -7,7 +7,7 @@ import 'react-select-search/style.css';
 
 
 export default function Admin({data}) {
-
+  console.log(data);
 
   const courseData = data[0].map(({ id, course_name }) => ({ name: course_name, value: id }));
   courseData.unshift(({ name: "New Course",  value: data[0].length, }));
@@ -56,25 +56,27 @@ export default function Admin({data}) {
         )
         break;
       case 'Skills':
-        setOptions([skillData]);
+        setOptions(skillData);
         setForm(
-          <form className="flex flex-col m-1" onSubmit={handleSubmit(buttonName, name, desc, deptcode, coursecode, id, type)}>
+          <form className="flex flex-col m-1" onSubmit={(event) => handleSubmit(event, buttonName, name, desc, deptcode, coursecode, id, type)}>
             
             <Input name="Skill ID" id="id" setter={setId} value={id} />
             <Input name="Skill Name" id="name" setter={setName} value={name} />
             <Input name="Description" id="desc" setter={setDesc} value={desc} />   
+            <button className="btn btn-primary" type="submit">{buttonName}</button>
 
           </form>
         )
         break;
       case 'Concepts':
-        setOptions([conceptData]);
+        setOptions(conceptData);
         setForm(
-          <form className="flex flex-col m-1" onSubmit={handleSubmit(buttonName, name, desc, deptcode, coursecode, id, type)}>
+          <form className="flex flex-col m-1" onSubmit={(event) => handleSubmit(event, buttonName, name, desc, deptcode, coursecode, id, type)}>
             
             <Input name="Course ID" id="id" setter={setId} value={id} />
             <Input name="Course Name" id="name" setter={setName} value={name} />
             <Input name="Description" id="desc" setter={setDesc} value={desc} />   
+            <button className="btn btn-primary" type="submit">{buttonName}</button>
 
           </form>
         )
@@ -135,12 +137,12 @@ const updateFields = (data, event, type, setName, setDesc, setDeptcode, setCours
 
   } else {
 
-    setName(data[i][event].course_name);
     setDesc(data[i][event].description);
     setId(data[i][event].id);
     setButtonName("Edit");
 
     if (i == 0) {
+      setName(data[i][event].course_name);
       setDeptcode(data[i][event].department_code);
       setCoursecode(data[i][event].course_code);
       setConcepts(data[i][event].concepts);
@@ -149,10 +151,12 @@ const updateFields = (data, event, type, setName, setDesc, setDeptcode, setCours
       setCoreqs(data[i][event].coreqs);
       setFollowups(data[i][event].followups);
     } else if (i == 1) {
+      setName(data[i][event].skill_name);
       setConcepts(data[i][event].concepts);
       setCourses(data[i][event].courses);
       setLinks(data[i][event].links);
     } else if (i == 2) {
+      setName(data[i][event].concept_name);
       setSkills(data[i][event].skills);
       setCourses(data[i][event].courses);
       setLinks(data[i][event].links);
@@ -198,7 +202,7 @@ const handleSubmit = (event, buttonName, name, desc, deptcode, coursecode, id, t
         "links": []
       }
     }
-    console.log(data);
+    
     fetch('http://localhost:3000/db/' + type.toLowerCase(), {
       method: 'POST',
       headers: {
@@ -209,6 +213,46 @@ const handleSubmit = (event, buttonName, name, desc, deptcode, coursecode, id, t
     .then(resp => {
       if (!resp.ok) {
         throw new Error("Creation Failed. " + resp.statusText);
+      }
+      console.log("Success!");
+    })
+    .catch(err => {
+      console.log(err);
+    })
+  } else {
+    let data;
+    if (type == 'Concepts') {
+      data = {
+        "id": id,
+        "name": name,
+        "desc": desc
+      }
+    } else if (type == "Courses") {
+      data = {
+        "id": id,
+        "depcode": deptcode,
+        "coursecode": coursecode,
+        "name": name,
+        "desc": desc
+      }
+    } else {
+      data = {
+        "id": id,
+        "name": name,
+        "desc": desc
+      }
+    }
+    
+    fetch('http://localhost:3000/db/' + type.toLowerCase() + '/' + id, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data)
+    })
+    .then(resp => {
+      if (!resp.ok) {
+        throw new Error("Update Failed. " + resp.statusText);
       }
       console.log("Success!");
     })
