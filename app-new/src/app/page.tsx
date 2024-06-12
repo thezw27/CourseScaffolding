@@ -1,66 +1,73 @@
 import Menu from '../components/menu';
-//import Graph from '../components/graph';
-import TestGraph from '../components/testgraph';
+import Graph from '../components/graph';
 import React from 'react';
+
+export interface Course {
+  id: string,
+  department_code: string,
+  course_code: string,
+  course_name: string,
+  description: string,
+  prereqs: string[],
+  followups: string[],
+  coreqs: string[],
+  skills: string[],
+  concepts: string[]
+}
+
+export interface Concept {
+  id: string,
+  concept_name: string,
+  description: string,
+  skills: string[],
+  courses: string[],
+  links: {
+    name: string,
+    description: string,
+    link: string
+  }[]
+}
+
+export interface Skill {
+  id: string,
+  skill_name: string,
+  description: string,
+  concepts: string[],
+  courses: string[],
+  links: {
+    name: string,
+    description: string,
+    link: string
+  }[]
+}
+
 
 export default async function Home() {
 
-  const data  = await fetchAll();
-
+  const data: [Course[], Skill[], Concept[]] = await fetchData();
+  
   return (
-    <main className="flex min-h-screen items-center justify-between p-24">
+    <main className="flex min-h-screen items-center justify-between">
       <Menu />
-      <TestGraph data={data} />
+      <Graph data={data} />
     </main>
   );
 }
 
-const fetchAll = async () => {
-  const DB_URL = 'http://localhost:3000/db/courses';
-
+const fetchData = async (): Promise<[Course[], Skill[], Concept[]]> => {
   try {
-    const resp = await fetch(DB_URL, {cache: 'no-cache'});
-    if (!resp.ok) {
-      console.log(resp);
-      throw new Error('Fetch Failed.');
-    }
-    const data = await resp.json();
+    const cresp = await fetch('http://localhost:3000/db/courses');
+    const sresp = await fetch('http://localhost:3000/db/skills');
+    const coresp = await fetch('http://localhost:3000/db/concepts');
 
-    const nodes = data.map((
-      {
-        id, 
-        department_code, 
-        course_code, 
-        course_name
-      } : {
-        id : string,
-        department_code : string,
-        course_code : number,
-        course_name : string
-      }
-    ) => (
-      {
-        id, 
-        department_code, 
-        course_code, 
-        course_name,
-        position: {x:0, y:0}
-      }
-    ));
+    const cdata = await cresp.json();
+    const sdata = await sresp.json();
+    const codata = await coresp.json();
 
-    let links = [];
-    for (const course of data ) {
-      for (const prereqId of course.prereqs) {
-        const link = {
-          'source': prereqId, 
-          'target': course.id
-        }
-        links.push(link);
-      }
-    }
-    return [nodes, links];
+    return [cdata, sdata, codata]
   } catch (err) {
-    console.log("An error occurred: ", err);
-    return [[], []];
+    console.log(err);
   }
+  return [[],[],[]]
 }
+

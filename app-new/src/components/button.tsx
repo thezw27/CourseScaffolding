@@ -1,8 +1,8 @@
 import React from 'react';
 
-const Button = ({label, clickHandler}:{label:string, clickHandler:React.MouseEventHandler<HTMLButtonElement>}) => {
+const Button = ({label, clickHandler}:{label:string, clickHandler:(val: string)=> void}) => {
   return (
-    <button className="btn btn-primary w-1/3" onClick={clickHandler}>{label}</button>
+    <button className="btn btn-primary" onClick={() => clickHandler(label)}>{label}</button>
   )
 }
 

@@ -1,4 +1,5 @@
 const express = require('express');
+const cors = require('cors');
 const next = require('next');
 
 const dev = process.env.NODE_ENV !== 'production';
@@ -7,8 +8,10 @@ const handle = nextapp.getRequestHandler();
 
 const db = require('./db');
 
+
 nextapp.prepare().then(() => {
   const app = express();
+  app.use(cors());
   const port = 3000;
 
   app.use('/db', db);

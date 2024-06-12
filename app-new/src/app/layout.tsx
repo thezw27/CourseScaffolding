@@ -10,18 +10,19 @@ export const metadata: Metadata = {
   description: "An interactive course planning tool.",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+
   return (
     <html lang="en">
       <body className={inter.className}>
         <PageContext>
           {children}
         </PageContext>
-        </body>
+      </body>
     </html>
   );
 }

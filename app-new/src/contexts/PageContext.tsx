@@ -12,7 +12,7 @@ import {
   EdgeChange
 } from 'reactflow';
 
-interface Course {
+export interface Course {
   id: string,
   department_code: string,
   course_code: string,
@@ -25,7 +25,7 @@ interface Course {
   concepts: string[]
 }
 
-interface Concept {
+export interface Concept {
   id: string,
   concept_name: string,
   description: string,
@@ -38,7 +38,7 @@ interface Concept {
   }[]
 }
 
-interface Skill {
+export interface Skill {
   id: string,
   skill_name: string,
   description: string,
@@ -58,9 +58,10 @@ export interface DataType {
   setEdges: (edges: Edge[]) => void,
   onNodesChange: OnNodesChange,
   onEdgesChange: OnEdgesChange,
-  courses: Course[],
-  concepts: Concept[],
-  skills: Skill[]
+  courses: Course[], setCourses: (courses: Course[]) => void,
+  concepts: Concept[], setConcepts: (courses: Concept[]) => void,
+  skills: Skill[], setSkills: (courses: Skill[]) => void,
+  graphType: string, setGraphType: (val: string) => void
 }
 
 export const DataContext = createContext<DataType>({
@@ -70,72 +71,38 @@ export const DataContext = createContext<DataType>({
   setEdges: (edges: Edge[]) => {},
   onNodesChange: (changes: NodeChange[]) => {},
   onEdgesChange: (changes: EdgeChange[]) => {},
-  courses: [],
-  concepts: [],
-  skills: []
+  courses: [], setCourses: (courses: Course[]) => {},
+  concepts: [], setConcepts: (courses: Concept[]) => {},
+  skills: [], setSkills: (courses: Skill[]) => {},
+  graphType: "Courses", setGraphType: (val: string) => {}
 })
 
-async function getData() {
-
-  try {
-    const cresp = await fetch('http://localhost:3000/db/courses', {cache: "no-cache"});
-    const sresp = await fetch('http://localhost:3000/db/skills', {cache: "no-cache"});
-    const coresp = await fetch('http://localhost:3000/db/concepts', {cache: "no-cache"});
-    
-    const cdata = await cresp.json();
-    const sdata = await sresp.json();
-    const codata = await coresp.json();
-
-    console.log(sresp);
-    return [cdata, sdata, codata]
-  } catch (err) {
-    console.log(err);
-  }
-  return [[],[],[]]
-}
-
-export default async function PageContext({
+export default function PageContext({
   children
 }: {
   children: React.ReactNode;
-}) {
-
-  const [contextData, setContextData] = useState<{
-    courses: any[];
-    skills: any[];
-    concepts: any[];
-  }>({
-    courses: [],
-    skills: [],
-    concepts: []
-  });
- 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [courses, skills, concepts] = await getData();
-        setContextData({ courses, skills, concepts });
-      } catch (error) {
-        console.error('Error fetching data:', error);
-      }
-    };
-
-    fetchData();
-  }, []);
-
+}) {  
+  
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [skills, setSkills] = useState<Skill[]>([]);
+  const [concepts, setConcepts] = useState<Concept[]>([]);
+  
+  const [graphType, setGraphType] = useState<string>("Courses");
 
   const [currentNodes, setNodes, onNodesChange] = useNodesState<Node[]>([]);
   const [currentEdges, setEdges, onEdgesChange] = useEdgesState<Edge[]>([]);
+
   return (
     <DataContext.Provider
       value={{
-        currentNodes,
-        setNodes,
-        currentEdges,
-        setEdges,
+        currentNodes, setNodes,
+        currentEdges, setEdges,
         onNodesChange,
         onEdgesChange,
-        ...contextData
+        courses, setCourses,
+        skills, setSkills,
+        concepts, setConcepts,
+        graphType, setGraphType
       }}
     >
       {children}

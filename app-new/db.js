@@ -13,8 +13,8 @@ const conceptSchema = new mongoose.Schema({
   id: String,
   concept_name: String,
   description: String,
-  skills: [Number],
-  courses: [Number],
+  skills: [String],
+  courses: [String],
   links: [String]
 });
 const Concept = mongoose.model('Concept', conceptSchema);
@@ -25,11 +25,11 @@ const coursesSchema = new mongoose.Schema({
   course_code: String,
   course_name: String,
   description: String,
-  prereqs: [Number],
-  coreqs: [Number],
-  followups: [Number],
-  skills: [Number],
-  concepts: [Number]
+  prereqs: [String],
+  coreqs: [String],
+  followups: [String],
+  skills: [String],
+  concepts: [String]
 });
 const Course = mongoose.model('Course', coursesSchema);
 
@@ -37,8 +37,8 @@ const skillsSchema = new mongoose.Schema({
   id: String,
   skill_name: String,
   description: String,
-  concepts: [Number],
-  courses: [Number],
+  concepts: [String],
+  courses: [String],
   links: [String]
 });
 const Skill = mongoose.model('Skill', skillsSchema);

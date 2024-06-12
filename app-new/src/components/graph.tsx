@@ -1,151 +1,240 @@
 'use client';
-import React, { useRef, useEffect } from 'react';
-import * as d3 from 'd3';
+import React, { useContext, useEffect, useState } from 'react';
+import { DataContext } from '@/contexts/PageContext';
+import ReactFlow, {
+  ConnectionLineType,
+  Node,
+  Edge,
+  useNodesState,
+  useEdgesState,
+  Position
+} from "reactflow";
+import "reactflow/dist/style.css";
+import dagre from "dagre";
 
-let mnt = false;
+//import { DataContext } from "@/contexts/PageContext";
 
-const Graph = ({data}) => {
+export interface Course {
+  id: string,
+  department_code: string,
+  course_code: string,
+  course_name: string,
+  description: string,
+  prereqs: string[],
+  followups: string[],
+  coreqs: string[],
+  skills: string[],
+  concepts: string[]
+}
+
+export interface Concept {
+  id: string,
+  concept_name: string,
+  description: string,
+  skills: string[],
+  courses: string[],
+  links: {
+    name: string,
+    description: string,
+    link: string
+  }[]
+}
+
+export interface Skill {
+  id: string,
+  skill_name: string,
+  description: string,
+  concepts: string[],
+  courses: string[],
+  links: {
+    name: string,
+    description: string,
+    link: string
+  }[]
+}
+
+const Graph = ({data}:{data:[Course[], Skill[], Concept[]]}) => {
 
   const width = 1200;
   const height = 800;
-  const svgRef = useRef(null);
+  const nodeWidth = 150;
+  const nodeHeight = 36;
+
+  const [nodes, setNodes, onNodesChange] = useNodesState<Node[]>([]);
+  const [edges, setEdges, onEdgesChange] = useEdgesState<Edge[]>([]);
+
+  const { graphType } = useContext(DataContext)
 
   useEffect(() => {
-    if (!mnt) {
-      const [nodes, links] = data;
-      generateGraph(svgRef, nodes, links, width, height);
-      mnt = true;
-    }
 
-  }, [])
+    const dagreGraph = new dagre.graphlib.Graph();
+    dagreGraph.setDefaultEdgeLabel(() => ({}));
+
+    const [tempNodes, tempEdges] = setGraphCourses(graphType, data);
+    console.log(tempNodes);
+    const [tempNodes2, tempEdges2] = getLayoutedElements(dagreGraph, tempNodes, tempEdges, "TB", nodeWidth, nodeHeight);
+    setNodes(tempNodes2); setEdges(tempEdges2);
+
+  }, [data, graphType])
 
   return (
-    <svg className="ml-auto border-2 border-gray-500" ref={svgRef} width={width} height={height} />
+    <div className="flex" style={{ width: width, height: height}}>
+      <ReactFlow
+        nodes={nodes}
+        edges={edges}
+        onNodesChange={onNodesChange}
+        onEdgesChange={onEdgesChange}
+        proOptions={{hideAttribution: true}}
+        connectionLineType={ConnectionLineType.SmoothStep}
+        fitView
+      >
+      </ReactFlow>
+    </div>
   )
 }
 
-const generateGraph = (svgR, nodes, links, width, height) => {
-  
-  const svg = d3.select(svgR.current);
-
-  svg.append("defs").append("marker")
-    .attr("viewBox", "0 0 10 10")
-    .attr("refX", "30")
-    .attr("refY", "5")
-    .attr("id", "arrow")
-    .attr("markerWidth", 3)
-    .attr("markerHeight", 5)
-    .attr("orient", "auto")
-    .append("path")
-    .attr("d", "M 0 0 L 10 5 L 0 10 z")
-    .attr("fill", "black");
-
-  const simulation = d3.forceSimulation(nodes)
-    .force("link", d3.forceLink(links).id(d => d.id).distance(100))
-    .force("charge", d3.forceManyBody().strength(-1000))
-    .force("x", d3.forceX())
-    .force("y", d3.forceY());
-
-  const link = svg.append("g")
-    .attr("stroke", "#999")
-    .attr("stroke-opacity", 0.6)
-    .selectAll("line")
-    .data(links)
-    .join("line")
-    .attr("stroke-width", 7)
-    .attr("marker-end", "url(#arrow)");
-
-  const node = svg.append("g")
-    .attr("stroke", "#fff")
-    .attr("stroke-width", 1.5)
-    .selectAll("circle")
-    .data(nodes)
-    .join("circle")
-    .attr("r", 35)
-    .attr("fill", function(d) {
-      switch (d.course_code[0]) {
-        case "1":
-            return "green";
-        case "2":
-            return "yellow";
-        case "4":
-            return "red";
-        default:
-            return "black";
-      }
-    })
-    .on("click", (d, e) => {
-      window.location.href = "/courses/" + e.id;
-    });
-
-  const text = svg.append("g")
-    .selectAll("text")
-    .data(nodes)
-    .join("text")
-    .text(d => d.course_name)
-    .attr("text-anchor", "middle")
-    .attr("alignment-baseline", "middle")
-    .on("click", (d, e) => {
-      window.location.href = "/courses/" + e.id;
-    });
-
-  node.call(d3.drag()
-    .on("start", (event) => dragstarted(event, simulation))
-    .on("drag", (event) => dragged(event, simulation))
-    .on("end", (event) => dragended(event, simulation)));
-
-  text.call(d3.drag()
-    .on("start", (event) => dragstarted(event, simulation))
-    .on("drag", (event) => dragged(event, simulation))
-    .on("end", (event) => dragended(event, simulation)));
-
-  simulation.on("tick", () => {
-    link
-      .attr("x1", d => d.source.x)
-      .attr("y1", d => d.source.y)
-      .attr("x2", d => d.target.x)
-      .attr("y2", d => d.target.y);
-
-    node
-      .attr("cx", d => d.x)
-      .attr("cy", d => d.y);
-    
-    text
-      .attr("x", d => d.x)
-      .attr("y", d => d.y);
-  });    
-
-  const zoom = d3
-    .zoom()
-    .scaleExtent([1/4, 128])
-    .on("zoom", (event) => zoomed(event, svg));
-
-  svg.call(zoom).call(zoom.translateTo, width / 2, height / 2);
-
-}
-
-const zoomed = (event, svg) => {
-  const { transform } = event;
-  svg.selectChildren('g')
-  .attr('transform', transform)
-}
-
-const dragstarted = (event, simulation) => {
-  if (!event.active) simulation.alphaTarget(0.3).restart();
-  event.subject.fx = event.subject.x;
-  event.subject.fy = event.subject.y;
-}
-
-const dragged = (event, simulation) => {
-  event.subject.fx = event.x;
-  event.subject.fy = event.y;
-}
-
-const dragended = (event, simulation) => {
-  if (!event.active) simulation.alphaTarget(0);
-  event.subject.fx = null;
-  event.subject.fy = null;
-}
-
-
 export default Graph;
+
+const getLayoutedElements = (dagreGraph: any, nodes: Node[], edges: Edge[], direction: string, nodeWidth: number, nodeHeight: number): [Node[], Edge[]] => {
+
+  const isHorizontal = direction === "LR";
+  dagreGraph.setGraph({ rankdir: direction });
+
+  nodes.forEach((node) => {
+    dagreGraph.setNode(node.id, { width: nodeWidth, height: nodeHeight });
+  });
+
+  edges.forEach((edge) => {
+    dagreGraph.setEdge(edge.source, edge.target);
+  });
+
+  dagre.layout(dagreGraph);
+
+  nodes.forEach((node) => {
+    const nodeWithPosition = dagreGraph.node(node.id);
+    node.targetPosition = isHorizontal ? Position.Left : Position.Top;
+    node.sourcePosition = isHorizontal ? Position.Right : Position.Bottom;
+
+    // We are shifting the dagre node position (anchor=center center) to the top left
+    // so it matches the React Flow node anchor point (top left).
+    node.position = {
+      x: nodeWithPosition.x - nodeWidth / 2,
+      y: nodeWithPosition.y - nodeHeight / 2,
+    };
+
+    return node;
+  });
+  return [nodes, edges]
+};
+
+const setGraphCourses = (graphType: string, data:[Course[], Skill[], Concept[]]): [Node[], Edge[]] => {
+  if (graphType == "Concepts") {
+    const node:Node[] = data[2].map((
+      {
+        id,
+        concept_name
+      } : {
+        id : string,
+        concept_name : string
+      }
+    ) => (
+      {
+        id, 
+        data : {
+          label: concept_name
+        },
+        position: {x:0, y:0}
+      }
+    ));
+
+    let links: Edge[] = [];
+    let i = 0;
+    /*
+    for (const course of data[2]) {
+      for (const prereqId of course.prereqs) {
+        const link:Edge = {
+          'type': 'smoothstep',
+          'source': prereqId.toString(), 
+          'target': course.id,
+          'id': i.toString()
+        }
+        links.push(link);
+        i++;
+      }
+    }
+    */
+    return [node, links]
+  } else if (graphType == "Skills") {
+        const node:Node[] = data[1].map((
+      {
+        id,
+        skill_name
+      } : {
+        id : string,
+        skill_name : string
+      }
+    ) => (
+      {
+        id, 
+        data : {
+          label: skill_name
+        },
+        position: {x:0, y:0}
+      }
+    ));
+
+    let links: Edge[] = [];
+    let i = 0;
+    /*
+    for (const course of data[1]) {
+      for (const prereqId of course.prereqs) {
+        const link:Edge = {
+          'type': 'smoothstep',
+          'source': prereqId.toString(), 
+          'target': course.id,
+          'id': i.toString()
+        }
+        links.push(link);
+        i++;
+      }
+    }
+    */
+    return [node, links]
+  } else {
+        const node:Node[] = data[0].map((
+      {
+        id,
+        course_name
+      } : {
+        id : string,
+        department_code : string,
+        course_code : string,
+        course_name : string
+      }
+    ) => (
+      {
+        id, 
+        data : {
+          label: course_name
+        },
+        position: {x:0, y:0}
+      }
+    ));
+
+    let links: Edge[] = [];
+    let i = 0;
+    for (const course of data[0]) {
+      for (const prereqId of course.prereqs) {
+        const link:Edge = {
+          'type': 'smoothstep',
+          'source': prereqId.toString(), 
+          'target': course.id,
+          'id': i.toString()
+        }
+        links.push(link);
+        i++;
+      }
+    }
+    return [node, links]
+  }
+};
