@@ -1,7 +1,10 @@
 'use client';
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useCallback, useRef, useState } from 'react';
 import { DataContext } from '@/contexts/PageContext';
 import ReactFlow, {
+  Background,
+  Controls,
+  MiniMap,
   ConnectionLineType,
   Node,
   Edge,
@@ -10,6 +13,7 @@ import ReactFlow, {
   Position
 } from "reactflow";
 import "reactflow/dist/style.css";
+import ContextMenu from './contextmenu';
 import dagre from "dagre";
 
 //import { DataContext } from "@/contexts/PageContext";
@@ -55,13 +59,20 @@ export interface Skill {
 
 const Graph = ({data}:{data:[Course[], Skill[], Concept[]]}) => {
 
+  const ref = useRef<HTMLDivElement | null>(null);
+
   const width = 1200;
   const height = 800;
-  const nodeWidth = 150;
+  const nodeWidth = 212;
   const nodeHeight = 36;
 
   const [nodes, setNodes, onNodesChange] = useNodesState<Node[]>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge[]>([]);
+  const [menu, setMenu] = useState<{label:string, top:number, left:number}>({
+    label: "",
+    top: 0,
+    left: 0
+  });
 
   const { graphType } = useContext(DataContext)
 
@@ -71,23 +82,55 @@ const Graph = ({data}:{data:[Course[], Skill[], Concept[]]}) => {
     dagreGraph.setDefaultEdgeLabel(() => ({}));
 
     const [tempNodes, tempEdges] = setGraphCourses(graphType, data);
-    console.log(tempNodes);
-    const [tempNodes2, tempEdges2] = getLayoutedElements(dagreGraph, tempNodes, tempEdges, "TB", nodeWidth, nodeHeight);
+    const [tempNodes2, tempEdges2] = getLayoutedElements(dagreGraph, tempNodes, tempEdges, nodeWidth, nodeHeight);
     setNodes(tempNodes2); setEdges(tempEdges2);
 
   }, [data, graphType])
 
+  
+  const handleClick = (event: React.MouseEvent, node: Node) => {
+    window.location.href = '/' + graphType.toLowerCase() + '/' + node.id;
+  }
+
+  const handleRightClick = useCallback(
+    (event: React.MouseEvent, node: Node) => {
+      // Prevent native context menu from showing
+      event.preventDefault();
+      if (ref.current) {
+        setMenu({
+        label: node.data.label,
+        top: event.clientY - ref.current.getBoundingClientRect().y,
+        left: event.clientX - ref.current.getBoundingClientRect().x
+      });
+      }
+    },
+    [setMenu],
+  );
+  const onPaneClick = useCallback((event:React.MouseEvent) => setMenu({
+    label: "",
+    top: 0,
+    left: 0
+  }), [setMenu]);
+
   return (
     <div className="flex" style={{ width: width, height: height}}>
       <ReactFlow
+        ref={ref}
         nodes={nodes}
         edges={edges}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         proOptions={{hideAttribution: true}}
         connectionLineType={ConnectionLineType.SmoothStep}
+        onNodeClick={handleClick}
+        onPaneClick={onPaneClick}
+        onNodeContextMenu={handleRightClick}
         fitView
       >
+      <Background />
+      <Controls />
+      <MiniMap />
+      <ContextMenu {...menu}/>
       </ReactFlow>
     </div>
   )
@@ -95,10 +138,9 @@ const Graph = ({data}:{data:[Course[], Skill[], Concept[]]}) => {
 
 export default Graph;
 
-const getLayoutedElements = (dagreGraph: any, nodes: Node[], edges: Edge[], direction: string, nodeWidth: number, nodeHeight: number): [Node[], Edge[]] => {
+const getLayoutedElements = (dagreGraph: any, nodes: Node[], edges: Edge[], nodeWidth: number, nodeHeight: number): [Node[], Edge[]] => {
 
-  const isHorizontal = direction === "LR";
-  dagreGraph.setGraph({ rankdir: direction });
+  dagreGraph.setGraph({ rankdir: "TB", ranker: "longest-path" });
 
   nodes.forEach((node) => {
     dagreGraph.setNode(node.id, { width: nodeWidth, height: nodeHeight });
@@ -112,8 +154,8 @@ const getLayoutedElements = (dagreGraph: any, nodes: Node[], edges: Edge[], dire
 
   nodes.forEach((node) => {
     const nodeWithPosition = dagreGraph.node(node.id);
-    node.targetPosition = isHorizontal ? Position.Left : Position.Top;
-    node.sourcePosition = isHorizontal ? Position.Right : Position.Bottom;
+    node.targetPosition = Position.Top;
+    node.sourcePosition = Position.Bottom;
 
     // We are shifting the dagre node position (anchor=center center) to the top left
     // so it matches the React Flow node anchor point (top left).

@@ -65,3 +65,23 @@ body {
 .custom-input {
   @apply bg-white appearance-none border-2 border-gray-400 rounded w-2/3 py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-500;
 }
+
+.custom-node {
+  width: 100px;
+}
+
+.context-menu {
+  background: white;
+  border-style: solid;
+  box-shadow: 10px 19px 20px rgba(0, 0, 0, 10%);
+  position: absolute;
+  z-index: 10;
+}
+
+.context-menu button {
+  border: none;
+  display: block;
+  padding: 0.5em;
+  text-align: left;
+  width: 100%;
+}

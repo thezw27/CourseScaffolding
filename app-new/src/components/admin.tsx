@@ -4,9 +4,46 @@ import Input from './input';
 import SelectSearch, { SelectedOptionValue } from 'react-select-search';
 import 'react-select-search/style.css';
 
+interface Course {
+  id: string,
+  department_code: string,
+  course_code: string,
+  course_name: string,
+  description: string,
+  prereqs: string[],
+  followups: string[],
+  coreqs: string[],
+  skills: string[],
+  concepts: string[]
+}
 
+interface Concept {
+  id: string,
+  concept_name: string,
+  description: string,
+  skills: string[],
+  courses: string[],
+  links: {
+    name: string,
+    description: string,
+    link: string
+  }[]
+}
 
-export default function Admin({data}:{data: any[]}) {
+interface Skill {
+  id: string,
+  skill_name: string,
+  description: string,
+  concepts: string[],
+  courses: string[],
+  links: {
+    name: string,
+    description: string,
+    link: string
+  }[]
+}
+
+export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
 
 
   const courseData = data[0].map(({ id, course_name } : { id:string, course_name:string }) => ({ name: course_name, value: id }));
@@ -14,15 +51,13 @@ export default function Admin({data}:{data: any[]}) {
 
   const skillData = data[1].map(({ id, skill_name } : { id:string, skill_name:string }) => ({ name: skill_name, value: id }));
   skillData.unshift(({ name: "New Skill",  value: data[1].length.toString(), }));
-  
+
   const conceptData = data[2].map(({ id, concept_name } : { id:string, concept_name:string }) => ({ name: concept_name, value: id }));
   conceptData.unshift(({ name: "New Concept",  value: data[2].length.toString(), }));
-  
-  console.log(courseData, skillData, conceptData);
 
   const [type, setType] = useState('Courses');
   const [form, setForm] = useState(<form></form>)
-
+  
   const [id, setId] = useState('0');
   
   const [name, setName] = useState('');
@@ -37,48 +72,149 @@ export default function Admin({data}:{data: any[]}) {
   const [coreqs, setCoreqs] = useState('');
   const [followups, setFollowups] = useState('');
   const [buttonName, setButtonName] = useState('Edit');
-  const [options, setOptions] = useState([]);
+  const [options, setOptions] = useState<{ name: string; value: string; }[]>([]);
+
+  const handleSubmit = (event : React.ChangeEvent<HTMLSelectElement> | React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (buttonName == "Create") {
+      let postData;
+      if (type == 'Concepts') {
+        postData = {
+          "id": id,
+          "name": name,
+          "desc": desc,
+          "skills": [],
+          "courses": [],
+          "links": []
+        }
+      } else if (type == "Courses") {
+        postData = {
+          "id": id,
+          "depcode": deptcode,
+          "coursecode": coursecode,
+          "name": name,
+          "desc": desc,
+          "prereq": [],
+          "coreq": [],
+          "followups": [],
+          "skills": [],
+          "concepts": []
+        }
+      } else {
+        postData = {
+          "id": id,
+          "name": name,
+          "desc": desc,
+          "concepts": [],
+          "courses": [],
+          "links": []
+        }
+      }
+
+      fetch('http://localhost:3000/db/' + type.toLowerCase(), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(postData)
+      })
+      .then(resp => {
+        if (!resp.ok) {
+          throw new Error("Creation Failed. " + resp.statusText);
+        }
+        
+        alert("Success!");
+        console.log("Success!");
+      })
+      .catch(err => {
+        alert('ERROR!: ' + err)
+        console.log(err);
+      })
+    } else {
+      let putData = {};
+      if (type == 'Concepts') {
+        putData = {
+          "id": id,
+          "name": name,
+          "desc": desc
+        }
+      } else if (type == "Courses") {
+        putData = {
+          "id": id,
+          "depcode": deptcode,
+          "coursecode": coursecode,
+          "name": name,
+          "desc": desc
+        }
+      } else {
+        putData = {
+          "id": id,
+          "name": name,
+          "desc": desc
+        }
+      }
+
+      fetch('http://localhost:3000/db/' + type.toLowerCase() + '/' + id, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(putData)
+      })
+      .then(resp => {
+        if (!resp.ok) {
+          throw new Error("Update Failed. " + resp.statusText);
+        }
+        console.log("Success!");
+      })
+      .catch(err => {
+        console.log(err);
+        alert("Error! " + err);
+      })
+    }
+  }
 
   useEffect(() => {
     switch (type) {
       case 'Courses':
         setOptions(courseData);
         setForm(
-          <form className="flex flex-col m-1" onSubmit={(event) => handleSubmit(event, buttonName, name, desc, deptcode, coursecode, id, type)}>
-            
-            <Input status="locked" name="Course ID" id="id" setter={setId} value={id} />
-            <Input name="Course Name" id="name" setter={setName} value={name} />
-            <Input name="Department" id="dept" setter={setDeptcode} value={deptcode} />
-            <Input name="Course Code" id="code" setter={setCoursecode} value={coursecode} />
-            <Input name="Description" id="desc" setter={setDesc} value={desc} />   
-            <button className="btn btn-primary" type="submit">{buttonName}</button>
-          </form>
+            <form className="flex flex-col m-1" onSubmit={(event) => handleSubmit(event)}>
+              
+              <Input status="locked" name="Course ID" id="id" setter={setId} value={id} />
+              <Input name="Course Name" id="name" setter={setName} value={name} />
+              <Input name="Department" id="dept" setter={setDeptcode} value={deptcode} />
+              <Input name="Course Code" id="code" setter={setCoursecode} value={coursecode} />
+              <Input name="Description" id="desc" setter={setDesc} value={desc} />   
+              <button className="btn btn-primary" type="submit">{buttonName}</button>
+            </form>
         )
         break;
       case 'Skills':
         setOptions(skillData);
         setForm(
-          <form className="flex flex-col m-1" onSubmit={(event) => handleSubmit(event, buttonName, name, desc, deptcode, coursecode, id, type)}>
-            
-            <Input name="Skill ID" id="id" setter={setId} value={id} />
-            <Input name="Skill Name" id="name" setter={setName} value={name} />
-            <Input name="Description" id="desc" setter={setDesc} value={desc} /> 
-            <button className="btn btn-primary" type="submit">{buttonName}</button>  
+            <form className="flex flex-col m-1" onSubmit={(event) => handleSubmit(event)}>
+              
+              <Input name="Skill ID" id="id" setter={setId} value={id} />
+              <Input name="Skill Name" id="name" setter={setName} value={name} />
+              <Input name="Description" id="desc" setter={setDesc} value={desc} /> 
+              <button className="btn btn-primary" type="submit">{buttonName}</button>  
 
-          </form>
+            </form>
         )
         break; 
       case 'Concepts':
         setOptions(conceptData);
         setForm(
-          <form className="flex flex-col m-1" onSubmit={(event) => handleSubmit(event, buttonName, name, desc, deptcode, coursecode, id, type)}>
-            
-            <Input name="Course ID" id="id" setter={setId} value={id} />
-            <Input name="Course Name" id="name" setter={setName} value={name} />
-            <Input name="Description" id="desc" setter={setDesc} value={desc} />  
-            <button className="btn btn-primary" type="submit">{buttonName}</button>   
+          
+            <form className="flex flex-col m-1" onSubmit={(event) => handleSubmit(event)}>
+              
+              <Input name="Course ID" id="id" setter={setId} value={id} />
+              <Input name="Course Name" id="name" setter={setName} value={name} />
+              <Input name="Description" id="desc" setter={setDesc} value={desc} />  
+              <button className="btn btn-primary" type="submit">{buttonName}</button>   
 
-          </form>
+            </form>
         )
         break;
       default:
@@ -87,7 +223,6 @@ export default function Admin({data}:{data: any[]}) {
         )
         break;
     }
-    
   }, [type, id, name, deptcode, coursecode, desc])
 
   return (
@@ -101,7 +236,6 @@ export default function Admin({data}:{data: any[]}) {
       <SelectSearch options={options} search={true} autoComplete='on' onChange={(event) => 
         updateFields(data, event.toString(), type, setName, setDesc, setDeptcode, setCoursecode, setConcepts, setCourses, setSkills, setLinks, setPrereqs, setCoreqs, setFollowups, setId, setButtonName)
       } />
-
       {form}
     </div>
   )
@@ -142,7 +276,6 @@ const updateFields = (data: any[], event : string, type : string, setName : Reac
     setButtonName("Edit");
 
     if (i == 0) {
-      console.log(data[i])
       setName(data[i][event].course_name);
       setDeptcode(data[i][event].department_code);
       setCoursecode(data[i][event].course_code);
@@ -162,103 +295,5 @@ const updateFields = (data: any[], event : string, type : string, setName : Reac
       setCourses(data[i][event].courses);
       setLinks(data[i][event].links);
     }
-  }
-}
-
-const handleSubmit = (event : React.ChangeEvent<HTMLSelectElement> | React.FormEvent<HTMLFormElement>, buttonName : string, name : string, desc : string, deptcode : string, coursecode : string, id : string, type : string) => {
-  event.preventDefault();
-
-  console.log(buttonName, name, desc, deptcode, coursecode, id, type)
-  if (buttonName == "Create") {
-    let data;
-    if (type == 'Concepts') {
-      data = {
-        "id": id,
-        "name": name,
-        "desc": desc,
-        "skills": [],
-        "courses": [],
-        "links": []
-      }
-    } else if (type == "Courses") {
-      data = {
-        "id": id,
-        "depcode": deptcode,
-        "coursecode": coursecode,
-        "name": name,
-        "desc": desc,
-        "prereq": [],
-        "coreq": [],
-        "followups": [],
-        "skills": [],
-        "concepts": []
-      }
-    } else {
-      data = {
-        "id": id,
-        "name": name,
-        "desc": desc,
-        "concepts": [],
-        "courses": [],
-        "links": []
-      }
-    }
-
-    fetch('http://localhost:3000/db/' + type.toLowerCase() +'/'+id, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data)
-    })
-    .then(resp => {
-      if (!resp.ok) {
-        throw new Error("Creation Failed. " + resp.statusText);
-      }
-      console.log("Success!");
-    })
-    .catch(err => {
-      console.log(err);
-    })
-  } else {
-    let data;
-    if (type == 'Concepts') {
-      data = {
-        "id": id,
-        "name": name,
-        "desc": desc
-      }
-    } else if (type == "Courses") {
-      data = {
-        "id": id,
-        "depcode": deptcode,
-        "coursecode": coursecode,
-        "name": name,
-        "desc": desc
-      }
-    } else {
-      data = {
-        "id": id,
-        "name": name,
-        "desc": desc
-      }
-    }
-
-    fetch('http://localhost:3000/db/' + type.toLowerCase() + '/' + id, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data)
-    })
-    .then(resp => {
-      if (!resp.ok) {
-        throw new Error("Update Failed. " + resp.statusText);
-      }
-      console.log("Success!");
-    })
-    .catch(err => {
-      console.log(err);
-    })
   }
 }

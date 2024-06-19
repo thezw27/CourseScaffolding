@@ -1,34 +1,69 @@
 import React from 'react';
 import Admin from '../../components/admin';
 
+interface Course {
+  id: string,
+  department_code: string,
+  course_code: string,
+  course_name: string,
+  description: string,
+  prereqs: string[],
+  followups: string[],
+  coreqs: string[],
+  skills: string[],
+  concepts: string[]
+}
+
+interface Concept {
+  id: string,
+  concept_name: string,
+  description: string,
+  skills: string[],
+  courses: string[],
+  links: {
+    name: string,
+    description: string,
+    link: string
+  }[]
+}
+
+interface Skill {
+  id: string,
+  skill_name: string,
+  description: string,
+  concepts: string[],
+  courses: string[],
+  links: {
+    name: string,
+    description: string,
+    link: string
+  }[]
+}
+
 export default async function Page() {
-  const data = await getData();
-  console.log(data);
+  
+  const data: [Course[], Skill[], Concept[]] = await fetchData();
+
   return (
-    <Admin data={data} />
+    <main className="flex min-h-screen items-center justify-between">
+      <Admin data={data} />
+    </main>
   )
 }
 
-async function getData() {
-
+const fetchData = async (): Promise<[Course[], Skill[], Concept[]]> => {
   try {
-    const cresp = await fetch('http://localhost:3000/db/courses', {cache: "no-cache"});
-    const sresp = await fetch('http://localhost:3000/db/skills', {cache: "no-cache"});
-    const coresp = await fetch('http://localhost:3000/db/concepts', {cache: "no-cache"});
-    
+    const cresp = await fetch('http://localhost:3000/db/courses');
+    const sresp = await fetch('http://localhost:3000/db/skills');
+    const coresp = await fetch('http://localhost:3000/db/concepts');
+
     const cdata = await cresp.json();
     const sdata = await sresp.json();
     const codata = await coresp.json();
 
-    console.log(sresp);
     return [cdata, sdata, codata]
   } catch (err) {
     console.log(err);
   }
   return [[],[],[]]
-}
-
-async function getObj(id: string) {
-  const resp = await fetch('http://localhost:3000/db/courses/' + id);
-  const data = await resp.json();
 }

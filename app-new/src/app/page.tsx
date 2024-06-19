@@ -2,7 +2,7 @@ import Menu from '../components/menu';
 import Graph from '../components/graph';
 import React from 'react';
 
-export interface Course {
+interface Course {
   id: string,
   department_code: string,
   course_code: string,
@@ -15,7 +15,7 @@ export interface Course {
   concepts: string[]
 }
 
-export interface Concept {
+interface Concept {
   id: string,
   concept_name: string,
   description: string,
@@ -28,7 +28,7 @@ export interface Concept {
   }[]
 }
 
-export interface Skill {
+interface Skill {
   id: string,
   skill_name: string,
   description: string,
