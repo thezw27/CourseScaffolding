@@ -1,5 +1,5 @@
 'use client';
-import React, { useContext, useEffect, useCallback, useRef, useState } from 'react';
+import React, { useContext, useEffect, useCallback, useRef, useState, useLayoutEffect } from 'react';
 import { DataContext } from '@/contexts/PageContext';
 import ReactFlow, {
   Background,
@@ -16,9 +16,10 @@ import "reactflow/dist/style.css";
 import ContextMenu from './contextmenu';
 import dagre from "dagre";
 
-//import { DataContext } from "@/contexts/PageContext";
+import ELK, { ElkNode } from 'elkjs/lib/elk.bundled.js';
 
-export interface Course {
+
+interface Course {
   id: string,
   department_code: string,
   course_code: string,
@@ -31,7 +32,7 @@ export interface Course {
   concepts: string[]
 }
 
-export interface Concept {
+interface Concept {
   id: string,
   concept_name: string,
   description: string,
@@ -44,7 +45,7 @@ export interface Concept {
   }[]
 }
 
-export interface Skill {
+interface Skill {
   id: string,
   skill_name: string,
   description: string,
@@ -74,20 +75,67 @@ const Graph = ({data}:{data:[Course[], Skill[], Concept[]]}) => {
     left: 0
   });
 
-  const { graphType } = useContext(DataContext)
+  const { graphType } = useContext(DataContext);
+
+  const elk = new ELK();
+  const elkOptions = {
+    'elk.algorithm': 'mrtree',
+    //'elk.layered.spacing.nodeNodeBetweenLayers': '100',
+    'elk.spacing.nodeNode': '160',
+  };
 
   useEffect(() => {
 
-    const dagreGraph = new dagre.graphlib.Graph();
-    dagreGraph.setDefaultEdgeLabel(() => ({}));
-
     const [tempNodes, tempEdges] = setGraphCourses(graphType, data);
-    const [tempNodes2, tempEdges2] = getLayoutedElements(dagreGraph, tempNodes, tempEdges, nodeWidth, nodeHeight);
-    setNodes(tempNodes2); setEdges(tempEdges2);
+    setNodes(tempNodes); setEdges(tempEdges);
+    const temp = getLayoutedElements(tempNodes, tempEdges)
+    .then((resp) => {
+      console.log(0, resp);
+      if (resp.nodes)
+      setNodes(resp.nodes);
+      setEdges(resp.edges);
+    });
 
   }, [data, graphType])
 
-  
+  const getLayoutedElements = (nodes: Node[], edges: Edge[]) => {
+
+    const graph = {
+      id: 'root',
+      layoutOptions: elkOptions,
+      children: nodes.map((node) => ({
+        ...node,
+        'data': node.data
+      })),
+      edges: edges
+    };
+
+    return elk
+    .layout(graph)
+    .then((data) => ({
+      nodes: data.children?.map((
+        {
+          id,
+          x,
+          y, 
+          data
+        }
+      ) => (
+        {
+          id : id,
+          data : data,
+          width : nodeWidth,
+          height : nodeHeight,
+          position : { x: x, y: y },
+          sourcePosition: "bottom",
+          targetPosition: "top"          
+        }
+      )),
+      edges: data.edges
+    }))
+    .catch(console.error);
+  };
+
   const handleClick = (event: React.MouseEvent, node: Node) => {
     window.location.href = '/' + graphType.toLowerCase() + '/' + node.id;
   }
@@ -111,7 +159,24 @@ const Graph = ({data}:{data:[Course[], Skill[], Concept[]]}) => {
     top: 0,
     left: 0
   }), [setMenu]);
+/*
+  const onLayout = useCallback(
+    () => {
 
+      getLayoutedElements(nodes, edges).then(({ nodes: layoutedNodes, edges: layoutedEdges }) => {
+        setNodes(layoutedNodes);
+        setEdges(layoutedEdges);
+
+        window.requestAnimationFrame(() => fitView());
+      });
+    },
+    [nodes, edges]
+  );
+
+  useLayoutEffect(() => {
+    onLayout();
+  }, []);
+*/
   return (
     <div className="flex" style={{ width: width, height: height}}>
       <ReactFlow
@@ -137,37 +202,6 @@ const Graph = ({data}:{data:[Course[], Skill[], Concept[]]}) => {
 }
 
 export default Graph;
-
-const getLayoutedElements = (dagreGraph: any, nodes: Node[], edges: Edge[], nodeWidth: number, nodeHeight: number): [Node[], Edge[]] => {
-
-  dagreGraph.setGraph({ rankdir: "TB", ranker: "longest-path" });
-
-  nodes.forEach((node) => {
-    dagreGraph.setNode(node.id, { width: nodeWidth, height: nodeHeight });
-  });
-
-  edges.forEach((edge) => {
-    dagreGraph.setEdge(edge.source, edge.target);
-  });
-
-  dagre.layout(dagreGraph);
-
-  nodes.forEach((node) => {
-    const nodeWithPosition = dagreGraph.node(node.id);
-    node.targetPosition = Position.Top;
-    node.sourcePosition = Position.Bottom;
-
-    // We are shifting the dagre node position (anchor=center center) to the top left
-    // so it matches the React Flow node anchor point (top left).
-    node.position = {
-      x: nodeWithPosition.x - nodeWidth / 2,
-      y: nodeWithPosition.y - nodeHeight / 2,
-    };
-
-    return node;
-  });
-  return [nodes, edges]
-};
 
 const setGraphCourses = (graphType: string, data:[Course[], Skill[], Concept[]]): [Node[], Edge[]] => {
   if (graphType == "Concepts") {
