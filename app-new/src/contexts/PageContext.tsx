@@ -31,6 +31,9 @@ export interface Concept {
   description: string,
   skills: string[],
   courses: string[],
+  prereqs: string[],
+  followups: string[],
+  coreqs: string[],
   links: {
     name: string,
     description: string,
@@ -44,6 +47,9 @@ export interface Skill {
   description: string,
   concepts: string[],
   courses: string[],
+  prereqs: string[],
+  followups: string[],
+  coreqs: string[],
   links: {
     name: string,
     description: string,

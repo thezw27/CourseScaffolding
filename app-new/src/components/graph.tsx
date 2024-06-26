@@ -1,6 +1,6 @@
 'use client';
 import React, { useContext, useEffect, useCallback, useRef, useState, useLayoutEffect } from 'react';
-import { DataContext } from '@/contexts/PageContext';
+import { DataContext, Concept, Course, Skill } from '@/contexts/PageContext';
 import ReactFlow, {
   Background,
   Controls,
@@ -9,71 +9,38 @@ import ReactFlow, {
   Node,
   Edge,
   useNodesState,
-  useEdgesState,
-  Position
+  useEdgesState
 } from "reactflow";
 import "reactflow/dist/style.css";
 import ContextMenu from './contextmenu';
 import dagre from "dagre";
 
-import ELK, { ElkNode } from 'elkjs/lib/elk.bundled.js';
-
-
-interface Course {
-  id: string,
-  department_code: string,
-  course_code: string,
-  course_name: string,
-  description: string,
-  prereqs: string[],
-  followups: string[],
-  coreqs: string[],
-  skills: string[],
-  concepts: string[]
-}
-
-interface Concept {
-  id: string,
-  concept_name: string,
-  description: string,
-  skills: string[],
-  courses: string[],
-  links: {
-    name: string,
-    description: string,
-    link: string
-  }[]
-}
-
-interface Skill {
-  id: string,
-  skill_name: string,
-  description: string,
-  concepts: string[],
-  courses: string[],
-  links: {
-    name: string,
-    description: string,
-    link: string
-  }[]
-}
+import ELK from 'elkjs/lib/elk.bundled.js';
 
 const Graph = ({data}:{data:[Course[], Skill[], Concept[]]}) => {
 
-  const ref = useRef<HTMLDivElement | null>(null);
+  const graphRef = useRef<HTMLDivElement | null>(null);
 
   const width = 1200;
   const height = 800;
-  const nodeWidth = 212;
-  const nodeHeight = 36;
+  const nodeWidth = 300;
+  const nodeHeight = 70;
 
   const [nodes, setNodes, onNodesChange] = useNodesState<Node[]>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge[]>([]);
-  const [menu, setMenu] = useState<{label:string, top:number, left:number}>({
+  const [menu, setMenu] = useState<{label:string, top:number, left:number, courseData: {id:string, name:string}[], type: boolean}>({
     label: "",
     top: 0,
-    left: 0
+    left: 0,
+    courseData: [],
+    type: false
   });
+
+  const [contextMenuHovered, setContextMenuHovered] = useState(false);
+  const [nodeHovered, setNodeHovered] = useState(false);
+  const [prevContextMenuState, setPrevContextMenuState] = useState<number>(0);
+  const [hoveredNode, setHoveredNode] = useState<Node>();
+  const [hoverEvent, setHoverEvent] = useState<React.MouseEvent>();
 
   const { graphType } = useContext(DataContext);
 
@@ -95,7 +62,6 @@ const Graph = ({data}:{data:[Course[], Skill[], Concept[]]}) => {
       setNodes(resp.nodes);
       setEdges(resp.edges);
     });
-
   }, [data, graphType])
 
   const getLayoutedElements = (nodes: Node[], edges: Edge[]) => {
@@ -140,25 +106,42 @@ const Graph = ({data}:{data:[Course[], Skill[], Concept[]]}) => {
     window.location.href = '/' + graphType.toLowerCase() + '/' + node.id;
   }
 
-  const handleRightClick = useCallback(
-    (event: React.MouseEvent, node: Node) => {
-      // Prevent native context menu from showing
-      event.preventDefault();
-      if (ref.current) {
-        setMenu({
-        label: node.data.label,
-        top: event.clientY - ref.current.getBoundingClientRect().y,
-        left: event.clientX - ref.current.getBoundingClientRect().x
-      });
+  useEffect(() => {
+
+    //prevState
+    //0 = false && false, aka no menu
+    //1 == true && false, aka node hovered
+    //2 == false && true, aka contextMenu hovered
+    //3 == true && true, error state?
+
+    if (!nodeHovered && !contextMenuHovered) {
+      setMenu({
+        label: "",
+        top: 0,
+        left: 0,
+        courseData: [],
+        type: false
+      })
+      setPrevContextMenuState(0);
+    } else if (nodeHovered && !contextMenuHovered) {
+      if (prevContextMenuState == 0) {
+        if (hoveredNode && hoverEvent && graphRef.current) {
+          
+          const nodeElement = (hoverEvent.target as Element).closest('.react-flow__node');
+          if (nodeElement) {
+            setMenu({
+              label: hoveredNode.data.label,
+              top: nodeElement.getBoundingClientRect().top - 5,
+              left: nodeElement.getBoundingClientRect().left - nodeWidth,
+              courseData: hoveredNode.data.courses,
+              type: !!hoveredNode.data.courses
+            });
+          }
+        }
+        setPrevContextMenuState(1);
       }
-    },
-    [setMenu],
-  );
-  const onPaneClick = useCallback((event:React.MouseEvent) => setMenu({
-    label: "",
-    top: 0,
-    left: 0
-  }), [setMenu]);
+    }
+  }, [nodeHovered, contextMenuHovered])
 /*
   const onLayout = useCallback(
     () => {
@@ -177,26 +160,29 @@ const Graph = ({data}:{data:[Course[], Skill[], Concept[]]}) => {
     onLayout();
   }, []);
 */
+
   return (
     <div className="flex" style={{ width: width, height: height}}>
-      <ReactFlow
-        ref={ref}
-        nodes={nodes}
-        edges={edges}
-        onNodesChange={onNodesChange}
-        onEdgesChange={onEdgesChange}
-        proOptions={{hideAttribution: true}}
-        connectionLineType={ConnectionLineType.SmoothStep}
-        onNodeClick={handleClick}
-        onPaneClick={onPaneClick}
-        onNodeContextMenu={handleRightClick}
-        fitView
-      >
-      <Background />
-      <Controls />
-      <MiniMap />
-      <ContextMenu {...menu}/>
-      </ReactFlow>
+      {/*<ReactFlowProvider>*/}
+        <ReactFlow
+          ref={graphRef}
+          nodes={nodes}
+          edges={edges}
+          onNodesChange={onNodesChange}
+          onEdgesChange={onEdgesChange}
+          connectionLineType={ConnectionLineType.SmoothStep}
+          onNodeClick={handleClick}
+          onNodeMouseEnter={(event, node) => {setNodeHovered(true); setHoveredNode(node); setHoverEvent(event)}}
+          onNodeMouseLeave={(event, node) => {setNodeHovered(false); setHoveredNode(node); setHoverEvent(event)}}
+          proOptions={{hideAttribution: true}}
+          fitView
+        >
+        <Background />
+        <Controls />
+        <MiniMap />
+        <ContextMenu {...menu} onHover={setContextMenuHovered} graphType={graphType}/>
+        </ReactFlow>
+      {/*</ReactFlowProvider>*/}
     </div>
   )
 }
@@ -205,19 +191,24 @@ export default Graph;
 
 const setGraphCourses = (graphType: string, data:[Course[], Skill[], Concept[]]): [Node[], Edge[]] => {
   if (graphType == "Concepts") {
+    console.log(data[2][0]);
     const node:Node[] = data[2].map((
       {
         id,
-        concept_name
-      } : {
-        id : string,
-        concept_name : string
-      }
+        concept_name,
+        courses
+      } : Concept
     ) => (
       {
         id, 
         data : {
-          label: concept_name
+          label: concept_name,
+          courses: courses.map(courseId => {
+            return {
+              id: courseId,
+              name: data[0][parseInt(courseId)].course_name
+            }              
+          })
         },
         position: {x:0, y:0}
       }
@@ -225,40 +216,43 @@ const setGraphCourses = (graphType: string, data:[Course[], Skill[], Concept[]])
 
     let links: Edge[] = [];
     let i = 0;
-    /*
-    for (const course of data[2]) {
-      for (const prereqId of course.prereqs) {
+    for (const concept of data[2]) {
+      for (const prereqId of concept.prereqs) {
         const link:Edge = {
           'type': 'smoothstep',
           'source': prereqId.toString(), 
-          'target': course.id,
+          'target': concept.id,
           'id': i.toString()
         }
         links.push(link);
         i++;
       }
     }
-    */
+
     return [node, links]
   } else if (graphType == "Skills") {
         const node:Node[] = data[1].map((
       {
         id,
-        skill_name
-      } : {
-        id : string,
-        skill_name : string
-      }
+        skill_name,
+        courses
+      } : Skill
     ) => (
       {
         id, 
         data : {
-          label: skill_name
+          label: skill_name,
+          courses: courses.map(courseId => {
+            return {
+              id: courseId,
+              name: data[0][parseInt(courseId)].course_name
+            } 
+          })
         },
         position: {x:0, y:0}
       }
     ));
-
+    console.log(node);
     let links: Edge[] = [];
     let i = 0;
     /*

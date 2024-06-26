@@ -15,7 +15,10 @@ const conceptSchema = new mongoose.Schema({
   description: String,
   skills: [String],
   courses: [String],
-  links: [String]
+  links: [String],
+  prereqs: [String],
+  coreqs: [String],
+  followups: [String],
 });
 const Concept = mongoose.model('Concept', conceptSchema);
 
@@ -39,7 +42,10 @@ const skillsSchema = new mongoose.Schema({
   description: String,
   concepts: [String],
   courses: [String],
-  links: [String]
+  links: [String],
+  prereqs: [String],
+  coreqs: [String],
+  followups: [String],
 });
 const Skill = mongoose.model('Skill', skillsSchema);
 
@@ -105,13 +111,18 @@ app.put('/concepts',  async (req, res) => {
   const skills = req.body.skills;
   const courses = req.body.courses;
   const links = req.body.links;
-
+  const prereq = req.body.prereq;
+  const coreq = req.body.coreqs;
+  const followups = req.body.followups;
   
 
   try {
     await Concept.updateMany({}, {
       "concept_name": name,
       "description": desc,
+      "prereqs": prereq,
+      "coreqs": coreq,
+      "followups": followups,
       "skills": skills,
       "courses": courses,
       "links": links
@@ -182,6 +193,9 @@ app.put('/concepts/:id',  async (req, res) => {
   const skills = req.body.skills;
   const courses = req.body.courses;
   const links = req.body.links;
+  const prereq = req.body.prereq;
+  const coreq = req.body.coreqs;
+  const followups = req.body.followups;
 
   
 
@@ -189,6 +203,9 @@ app.put('/concepts/:id',  async (req, res) => {
     await Concept.updateOne({"id": id}, {
       "concept_name": name,
       "description": desc,
+      "prereqs": prereq,
+      "coreqs": coreq,
+      "followups": followups,
       "skills": skills,
       "courses": courses,
       "links": links
@@ -459,6 +476,9 @@ app.post('/skills', async (req, res) => {
   const concepts = req.body.concepts;
   const courses = req.body.courses;
   const links = req.body.links;
+  const prereq = req.body.prereq;
+  const coreq = req.body.coreqs;
+  const followups = req.body.followups;
 
   
 
@@ -467,6 +487,9 @@ app.post('/skills', async (req, res) => {
       "id": id,
       "skill_name": name,
       "description": desc,
+      "prereqs": prereq,
+      "coreqs": coreq,
+      "followups": followups,
       "concepts": concepts,
       "courses": courses,
       "links": links
@@ -489,6 +512,9 @@ app.put('/skills',  async (req, res) => {
   const concepts = req.body.concepts;
   const courses = req.body.courses;
   const links = req.body.links;
+  const prereq = req.body.prereq;
+  const coreq = req.body.coreqs;
+  const followups = req.body.followups;
 
   
 
@@ -497,6 +523,9 @@ app.put('/skills',  async (req, res) => {
       "id": id,
       "skill_name": name,
       "description": desc,
+      "prereqs": prereq,
+      "coreqs": coreq,
+      "followups": followups,
       "concepts": concepts,
       "courses": courses,
       "links": links
@@ -568,6 +597,9 @@ app.put('/skills/:id',  async (req, res) => {
   const concepts = req.body.concepts;
   const courses = req.body.courses;
   const links = req.body.links;
+  const prereq = req.body.prereq;
+  const coreq = req.body.coreqs;
+  const followups = req.body.followups;
 
   
 

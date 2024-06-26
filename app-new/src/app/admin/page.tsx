@@ -1,44 +1,6 @@
 import React from 'react';
 import Admin from '../../components/admin';
-
-interface Course {
-  id: string,
-  department_code: string,
-  course_code: string,
-  course_name: string,
-  description: string,
-  prereqs: string[],
-  followups: string[],
-  coreqs: string[],
-  skills: string[],
-  concepts: string[]
-}
-
-interface Concept {
-  id: string,
-  concept_name: string,
-  description: string,
-  skills: string[],
-  courses: string[],
-  links: {
-    name: string,
-    description: string,
-    link: string
-  }[]
-}
-
-interface Skill {
-  id: string,
-  skill_name: string,
-  description: string,
-  concepts: string[],
-  courses: string[],
-  links: {
-    name: string,
-    description: string,
-    link: string
-  }[]
-}
+import { Concept, Course, Skill } from '@/contexts/PageContext';
 
 export default async function Page() {
   
