@@ -127,12 +127,13 @@ const Graph = ({data}:{data:[Course[], Skill[], Concept[]]}) => {
       if (prevContextMenuState == 0) {
         if (hoveredNode && hoverEvent && graphRef.current) {
           
-          const nodeElement = (hoverEvent.target as Element).closest('.react-flow__node');
+          const nodeElement = (hoverEvent.target as Element).closest('.react-flow__node')?.getBoundingClientRect();
           if (nodeElement) {
+            console.log(nodeElement.height);
             setMenu({
               label: hoveredNode.data.label,
-              top: nodeElement.getBoundingClientRect().top - 5,
-              left: nodeElement.getBoundingClientRect().left - nodeWidth,
+              top: nodeElement.top - 0.5 * nodeElement.height,
+              left: nodeElement.left - 2 * nodeWidth,
               courseData: hoveredNode.data.courses,
               type: !!hoveredNode.data.courses
             });
@@ -255,7 +256,7 @@ const setGraphCourses = (graphType: string, data:[Course[], Skill[], Concept[]])
     console.log(node);
     let links: Edge[] = [];
     let i = 0;
-    /*
+    
     for (const course of data[1]) {
       for (const prereqId of course.prereqs) {
         const link:Edge = {
@@ -268,7 +269,7 @@ const setGraphCourses = (graphType: string, data:[Course[], Skill[], Concept[]])
         i++;
       }
     }
-    */
+    console.log(node, links);
     return [node, links]
   } else {
         const node:Node[] = data[0].map((

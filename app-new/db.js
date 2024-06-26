@@ -15,7 +15,11 @@ const conceptSchema = new mongoose.Schema({
   description: String,
   skills: [String],
   courses: [String],
-  links: [String],
+  links:  [{
+    'name': String,
+    'type': String,
+    'link': String,
+  }],
   prereqs: [String],
   coreqs: [String],
   followups: [String],
@@ -42,7 +46,11 @@ const skillsSchema = new mongoose.Schema({
   description: String,
   concepts: [String],
   courses: [String],
-  links: [String],
+  links:  [{
+    'name': String,
+    'type': String,
+    'link': String,
+  }],
   prereqs: [String],
   coreqs: [String],
   followups: [String],
@@ -569,12 +577,10 @@ app.delete('/skills', async (req, res) => {
 app.get('/skills/:id', async (req, res) => {
 
   const id = req.params.id;
-
-  
   
   try {
     const data = await Skill.find({"id": id});
-    //console.log(data);
+    console.log(1, data);
     res.send(data);
   } catch (err) {
     //console.log(err);

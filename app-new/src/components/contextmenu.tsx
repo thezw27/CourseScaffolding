@@ -1,6 +1,4 @@
 import React, { ReactElement, useCallback } from 'react';
-import { JSXSource } from 'react/jsx-dev-runtime';
-import { useReactFlow } from 'reactflow';
 
 export default function ContextMenu(
   {
@@ -31,7 +29,7 @@ export default function ContextMenu(
       <ul>
         <li><strong>Used In:</strong></li>
         {courseData.map((course) => (
-          <li><a href={"/" + graphType.toLowerCase() + '/' + course.id}>{course.name}</a></li>
+          <li><a style={{ color: "blue" }} href={"/courses/" + course.id}>{course.name}</a></li>
         ))}
       </ul>
     );
@@ -39,7 +37,7 @@ export default function ContextMenu(
 
   return (
     <div
-      style={{ top, left, position: 'absolute' }}
+      style={{ top, left, position: 'absolute', width: '200px', justifyContent: "center" }}
       className="context-menu"
       onMouseEnter={() => onHover(true)}
       onMouseLeave={() => onHover(false)}

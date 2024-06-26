@@ -36,8 +36,8 @@ export interface Concept {
   coreqs: string[],
   links: {
     name: string,
-    description: string,
-    link: string
+    type: string,
+    link: string,
   }[]
 }
 
@@ -52,8 +52,8 @@ export interface Skill {
   coreqs: string[],
   links: {
     name: string,
-    description: string,
-    link: string
+    type: string,
+    link: string,
   }[]
 }
 

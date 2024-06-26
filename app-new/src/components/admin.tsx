@@ -20,7 +20,7 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
   const [type, setType] = useState('Courses');
   const [form, setForm] = useState(<form></form>)
   
-  const [id, setId] = useState('0');
+  const [id, setId] = useState('Select a course, skill, or concept');
   
   const [name, setName] = useState('');
   const [desc, setDesc] = useState('');
@@ -157,7 +157,7 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
         setForm(
             <form className="flex flex-col m-1" onSubmit={(event) => handleSubmit(event)}>
               
-              <Input name="Skill ID" id="id" setter={setId} value={id} />
+              <Input status="locked" name="Skill ID" id="id" setter={setId} value={id} />
               <Input name="Skill Name" id="name" setter={setName} value={name} />
               <Input name="Description" id="desc" setter={setDesc} value={desc} /> 
               <button className="btn btn-primary" type="submit">{buttonName}</button>  
@@ -171,7 +171,7 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
           
             <form className="flex flex-col m-1" onSubmit={(event) => handleSubmit(event)}>
               
-              <Input name="Course ID" id="id" setter={setId} value={id} />
+              <Input status="locked" name="Course ID" id="id" setter={setId} value={id} />
               <Input name="Course Name" id="name" setter={setName} value={name} />
               <Input name="Description" id="desc" setter={setDesc} value={desc} />  
               <button className="btn btn-primary" type="submit">{buttonName}</button>   
