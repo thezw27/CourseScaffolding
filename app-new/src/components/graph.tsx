@@ -177,6 +177,7 @@ const Graph = ({data}:{data:[Course[], Skill[], Concept[]]}) => {
           onNodeMouseLeave={(event, node) => {setNodeHovered(false); setHoveredNode(node); setHoverEvent(event)}}
           proOptions={{hideAttribution: true}}
           fitView
+          minZoom={0.001}
         >
         <Background />
         <Controls />
