@@ -9,51 +9,49 @@ app.use(express.json());
 require('dotenv').config();
 const MONGO = process.env.MONGO;
 
+const linkSchema = new mongoose.Schema({
+  name: { type: String, required: true },
+  type: { type: String, required: true, enum: ["video", "article"] },
+  link: { type: String, required: true }
+});
+
 const conceptSchema = new mongoose.Schema({
-  id: String,
+  id: Number,
   concept_name: String,
   description: String,
-  skills: [String],
-  courses: [String],
-  links:  [{
-    'name': String,
-    'type': String,
-    'link': String,
-  }],
-  prereqs: [String],
-  coreqs: [String],
-  followups: [String],
+  skills: [Number],
+  courses: [Number],
+  links:  [linkSchema],
+  prereqs: [Number],
+  coreqs: [Number],
+  followups: [Number],
 });
 const Concept = mongoose.model('Concept', conceptSchema);
 
 const coursesSchema = new mongoose.Schema({
-  id: String,
+  id: Number,
   department_code: String,
   course_code: String,
   course_name: String,
   description: String,
-  prereqs: [String],
-  coreqs: [String],
-  followups: [String],
-  skills: [String],
-  concepts: [String]
+  prereqs: [Number],
+  coreqs: [Number],
+  followups: [Number],
+  skills: [Number],
+  concepts: [Number]
 });
 const Course = mongoose.model('Course', coursesSchema);
 
 const skillsSchema = new mongoose.Schema({
-  id: String,
+  id: Number,
   skill_name: String,
   description: String,
-  concepts: [String],
-  courses: [String],
-  links:  [{
-    'name': String,
-    'type': String,
-    'link': String,
-  }],
-  prereqs: [String],
-  coreqs: [String],
-  followups: [String],
+  concepts: [Number],
+  courses:[Number],
+  links:[linkSchema],
+  prereqs: [Number],
+  coreqs: [Number],
+  followups: [Number],
 });
 const Skill = mongoose.model('Skill', skillsSchema);
 

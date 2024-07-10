@@ -20,6 +20,7 @@
     "react-dom": "^18",
     "react-draggable": "^4.4.6",
     "react-flow": "^1.0.3",
+    "react-select": "^5.8.0",
     "react-select-search": "^4.1.7",
     "reactflow": "^11.11.3"
   },

@@ -12,49 +12,52 @@ import {
   EdgeChange
 } from 'reactflow';
 
+export interface Option {
+  label: string,
+  value: number
+}
+
 export interface Course {
-  id: string,
+  id: number,
   department_code: string,
   course_code: string,
   course_name: string,
   description: string,
-  prereqs: string[],
-  followups: string[],
-  coreqs: string[],
-  skills: string[],
-  concepts: string[]
+  prereqs: number[],
+  followups: number[],
+  coreqs: number[],
+  skills: number[],
+  concepts:number[]
 }
 
 export interface Concept {
-  id: string,
+  id: number,
   concept_name: string,
   description: string,
-  skills: string[],
-  courses: string[],
-  prereqs: string[],
-  followups: string[],
-  coreqs: string[],
-  links: {
-    name: string,
-    type: string,
-    link: string,
-  }[]
+  skills: number[],
+  courses: number[],
+  prereqs: number[],
+  followups: number[],
+  coreqs: number[],
+  links: Link[]
 }
 
 export interface Skill {
-  id: string,
+  id: number,
   skill_name: string,
   description: string,
-  concepts: string[],
-  courses: string[],
-  prereqs: string[],
-  followups: string[],
-  coreqs: string[],
-  links: {
-    name: string,
-    type: string,
-    link: string,
-  }[]
+  concepts: number[],
+  courses: number[],
+  prereqs: number[],
+  followups: number[],
+  coreqs: number[],
+  links: Link[]
+}
+
+export interface Link {
+  link: string,
+  name: string,
+  type: "video" | "article"
 }
 
 export interface DataType {
