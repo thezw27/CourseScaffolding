@@ -22,7 +22,6 @@ const Menu = () => {
           <Button label="Skills" clickHandler={setGraphType}/>
           <Button label="Concepts" clickHandler={setGraphType}/>
           {/*<Button label="Help" />*/}
-          <a href="/admin" className="btn btn-primary">Admin Portal</a>
         </div>
       </div>
     </Draggable>

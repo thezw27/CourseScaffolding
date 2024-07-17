@@ -12,7 +12,7 @@ import {
   EdgeChange
 } from 'reactflow';
 
-export interface Option {
+export interface SelectOption {
   label: string,
   value: number
 }

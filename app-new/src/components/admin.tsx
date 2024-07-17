@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import Input from './input';
 import Select, { MultiValue } from 'react-select';
 import makeAnimated from 'react-select/animated';
+import Header from "../components/header";
 //import SelectSearch, { SelectedOptionValue } from 'react-select-search';
 //import 'react-select-search/style.css';
 import { Concept, Course, Skill, Link, SelectOption } from '@/contexts/PageContext';
@@ -325,22 +326,25 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
   }, [type, id, name, deptcode, coursecode, desc, concepts, courses, prereqs, coreqs, skills, followups])
 
   return (
-    <div style={{width: 1200, height:800}} className="mx-auto w-1/2 flex flex-col justify-center">
-      <label htmlFor="type">Type</label>
-      <Select 
-        id="type"
-        options={menuOptions} 
-        defaultValue={menuOptions[0]}
-        isSearchable={false}
-        onChange={(event) => setType((event as { value: string }).value as "Courses" | "Concepts" | "Skills" )}
-      />
-      <label htmlFor="objSelect">{type}</label>
-      <Select
-        id="objSelect" 
-        options={options} 
-        onChange={(event) => updateFields((event as { value: number}).value)} 
+    <div>
+      <Header />
+      <div style={{ paddingTop: '10vh', width: 1200, height:800}} className="mx-auto w-1/2 flex flex-col">
+        <label htmlFor="type">Type</label>
+        <Select 
+          id="type"
+          options={menuOptions} 
+          defaultValue={menuOptions[0]}
+          isSearchable={false}
+          onChange={(event) => setType((event as { value: string }).value as "Courses" | "Concepts" | "Skills" )}
         />
-      {form}
+        <label htmlFor="objSelect">{type}</label>
+        <Select
+          id="objSelect" 
+          options={options} 
+          onChange={(event) => updateFields((event as { value: number}).value)} 
+          />
+        {form}
+      </div>
     </div>
   )
 }

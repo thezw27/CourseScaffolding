@@ -1,5 +1,6 @@
 import Menu from '../components/menu';
 import Graph from '../components/graph';
+import Header from "../components/header";
 import React from 'react';
 import { Concept, Course, Skill } from '@/contexts/PageContext';
 
@@ -9,9 +10,12 @@ export default async function Home() {
   const data: [Course[], Skill[], Concept[]] = await fetchData();
   
   return (
-    <main className="flex min-h-screen items-center justify-between">
-      <Menu />
-      <Graph data={data} />
+    <main>
+      <Header />
+      <div className="flex items-center justify-between" style={{ paddingTop: "10vh" }}>
+        <Menu />
+        <Graph data={data} />
+      </div>
     </main>
   );
 }

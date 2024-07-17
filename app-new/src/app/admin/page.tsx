@@ -7,7 +7,7 @@ export default async function Page() {
   const data: [Course[], Skill[], Concept[]] = await fetchData();
 
   return (
-    <main className="flex min-h-screen items-center justify-between">
+    <main>
       <Admin data={data} />
     </main>
   )
