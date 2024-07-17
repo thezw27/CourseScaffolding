@@ -1,94 +1,108 @@
 import React from 'react';
-import { Concept, Course, Skill } from '@/contexts/PageContext';
+import Header from "../../../components/header";
 
-
-export default async function Page({params} : {params:{id:string}}) {
+export default async function Page({params}) {
   const resp = await fetch("http://localhost:3000/db/skills/" + params.id);
   const temp = await resp.json();
-  const data:Skill = temp[0];
-  console.log(data);
+  const data = temp[0];
 
-  //const links = populateLinks(data);
+  const skillRelationList = populateSkills(data);
   const relationships = populateRelationships(data);
 
   return (
-    <main className="flex flex-col justify-center m-10">
-      <div>
-        <h1 className="text-center text-3xl font-bold m-2">{data.skill_name}</h1>
-        <p className="text-center m-2">{data.description}</p>
-      </div>
-      <div className="flex justify-center">
-        {/*links*/}
-        {relationships}
-      </div>
+    <main>
+      <Header/>
+      <div className="flex flex-col justify-center" style={{paddingTop: '15vh'}}>
+        <div>
+          <h1 className="text-center text-3xl font-bold m-2">{data.skill_name}</h1>
+          <p className="text-center m-2">{data.description}</p>
+        </div>
+        <div className="flex justify-center ">
+          {skillRelationList}
+          {relationships}
+        </div>
+        </div>
     </main>
   )
 }
-  /*
-const populateLinks = (data: Skill) => {
+  
+const populateSkills = async (data) => {
 
-  let linksList = [];
+  let prereqList = [];
+  let coreqList = [];
+  let followupList = [];
+
+  for (let i = 0; i < data.prereqs.length; i++) {
+    try {
+      const resp = await fetch("http://localhost:3000/db/skills/" + data.prereqs[i]);
+      const d = await resp.json();
+
+      prereqList.push(<li className="link" key={d[0].id}><a href= {'/skills/' + d[0].id} > { d[0].skill_name } </a></li>);
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
+  for (let i = 0; i < data.coreqs.length; i++) {
+    try {
+      const resp = await fetch("http://localhost:3000/db/skills/" + data.coreqs[i]);
+      const d = await resp.json();
+
+      coreqList.push(<li className="link" key={d[0].id}><a href= {'/skills/' + d[0].id} > { d[0].skill_name } </a></li>);
+    } catch (err) {
+      console.log(err);
+    }
+  }
   console.log(data);
-  for (let i = 0; i < data.links.length; i++) {
-   linksList.push(<li key={i}><a href= { data.links[i].link } > { data.links[i].name } </a></li>);
+  for (let i = 0; i < data.followups.length; i++) {
+    try {
+      const resp = await fetch("http://localhost:3000/db/skills/" + data.followups[i]);
+      const d = await resp.json();
+      console.log(d);
+      followupList.push(<li className="link" key={d[0].id}><a href= {'/skills/' + d[0].id} > { d[0].skill_name } </a></li>);
+    } catch (err) {
+      console.log(err);
+    }
   }
 
   return (
     <div className="w-1/3 text-center">
 
-      <h3>Resources to learn more</h3>
-      <ul className="mb-4">{linksList}</ul>
+      <h3>Prerequisites</h3>
+      <ul className="mb-4">{prereqList}</ul>
+
+      <h3>Corequisities</h3>
+      <ul className="mb-4">{coreqList}</ul>
+
+      <h3>Follow Up skills</h3>
+      <ul className="mb-4">{followupList}</ul>
 
     </div>
   );
 }
-*/
-const populateRelationships = async (data: Skill) => {
 
-  let conceptsList = [];
+const populateRelationships = async (data) => {
+
   let coursesList = [];
-  let preReqList = [];
-  let followUpList = [];
-
-  for (let i = 0; i < data.concepts.length; i++) {
-    try {
-      const resp = await fetch("http://localhost:3000/db/concepts/" + data.concepts[i]);
-      const d = await resp.json();
-
-      conceptsList.push(<li style={{color: 'blue'}} key={d[0].id}><a href= {'/concepts/' + d[0].id} > { d[0].concept_name } </a></li>);
-    } catch (err) {
-      console.log(err);
-    }
-  }
+  let conceptsList = [];
 
   for (let i = 0; i < data.courses.length; i++) {
     try {
       const resp = await fetch("http://localhost:3000/db/courses/" + data.courses[i]);
       const d = await resp.json();
 
-      coursesList.push(<li style={{color: 'blue'}} key={d[0].id}><a href= {'/courses/' + d[0].id} > { d[0].course_name } </a></li>);
+      coursesList.push(<li className="link" key={d[0].id}><a href= {'/courses/' + d[0].id} > { d[0].course_name } </a></li>);
     } catch (err) {
       console.log(err);
     }
   }
 
-  for (let i = 0; i < data.prereqs.length; i++) {
+  for (let i = 0; i < data.concepts.length; i++) {
     try {
-      const resp = await fetch("http://localhost:3000/db/skills/" + data.prereqs[i]);
-      const d = await resp.json(); 
-
-      preReqList.push(<li style={{color: 'blue'}} key={d[0].id}><a href= {'/skills/' + d[0].id} > { d[0].skill_name } </a></li>);
-    } catch (err) {
-      console.log(err);
-    }
-  }
-
-  for (let i = 0; i < data.followups.length; i++) {
-    try {
-      const resp = await fetch("http://localhost:3000/db/skills/" + data.followups[i]);
+      const resp = await fetch("http://localhost:3000/db/concepts/" + data.concepts[i]);
       const d = await resp.json();
 
-      followUpList.push(<li style={{color: 'blue'}} key={d[0].id}><a href= {'/skills/' + d[0].id} > { d[0].skill_name } </a></li>);
+      conceptsList.push(<li className="link" key={d[0].id}><a href= {'/concepts/' + d[0].id} > { d[0].concept_name } </a></li>);
     } catch (err) {
       console.log(err);
     }
@@ -97,17 +111,11 @@ const populateRelationships = async (data: Skill) => {
   return (
     <div className="w-1/3 text-center">
 
-      <h3>Fundamental concepts</h3>
-      <ul className="mb-4">{conceptsList}</ul>
-
-      <h3>Courses that teach about this concept</h3>
+      <h3>Courses that use this skill</h3>
       <ul className="mb-4">{coursesList}</ul>
 
-      <h3>Prerequisite Skills</h3>
-      <ul className="mb-4">{preReqList}</ul>
-
-      <h3>Follow Up Skills</h3>
-      <ul className="mb-4">{followUpList}</ul>
+      <h3>Concepts related to this skill</h3>
+      <ul className="mb-4">{conceptsList}</ul>
 
     </div>
   );

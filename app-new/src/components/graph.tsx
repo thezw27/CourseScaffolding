@@ -9,7 +9,8 @@ import ReactFlow, {
   Node,
   Edge,
   useNodesState,
-  useEdgesState
+  useEdgesState,
+  Viewport
 } from "reactflow";
 import "reactflow/dist/style.css";
 import ContextMenu from './contextmenu';
@@ -21,6 +22,8 @@ const Graph = ({data}:{data:[Course[], Skill[], Concept[]]}) => {
 
   const [tempL, setMid] = useState<number>(0);
   const [tempR, setTop] = useState<number>(0);
+
+  const [nodeElement, setNodeElement] = useState<Element | null>();
 
   const graphRef = useRef<HTMLDivElement | null>(null);
 
@@ -129,19 +132,23 @@ const Graph = ({data}:{data:[Course[], Skill[], Concept[]]}) => {
         courseData: [],
         type: false
       })
+      setNodeElement(undefined);
       setPrevContextMenuState(0);
     } else if (nodeHovered && !contextMenuHovered) {
       if (prevContextMenuState == 0) {
         if (hoveredNode && hoverEvent && graphRef.current) {
           
-          const nodeElement = (hoverEvent.target as Element).closest('.react-flow__node')?.getBoundingClientRect();
-          if (nodeElement) {
-            setTop(nodeElement.top+nodeElement.height);
-            setMid(nodeElement.left+nodeElement.width/2);
+          setNodeElement((hoverEvent.target as Element).closest('.react-flow__node'));
+          const tempNodeElement = (hoverEvent.target as Element).closest('.react-flow__node')?.getBoundingClientRect();
+
+          console.log(nodeElement)
+          if (tempNodeElement) {
+            setTop(tempNodeElement.top+tempNodeElement.height);
+            setMid(tempNodeElement.left+tempNodeElement.width/2);
             setMenu({
               label: hoveredNode.data.label,
-              top: nodeElement.top + nodeElement.height,
-              left: nodeElement.left + nodeElement.width/2 - 100,
+              top: tempNodeElement.top + tempNodeElement.height,
+              left: tempNodeElement.left + tempNodeElement.width/2 - 100,
               courseData: hoveredNode.data.courses,
               type: !!hoveredNode.data.courses
             });
@@ -150,8 +157,9 @@ const Graph = ({data}:{data:[Course[], Skill[], Concept[]]}) => {
         setPrevContextMenuState(1);
       }
     }
-  }, [nodeHovered, contextMenuHovered,])
+  }, [nodeHovered, contextMenuHovered])
 /*
+
   const onLayout = useCallback(
     () => {
 
@@ -170,11 +178,19 @@ const Graph = ({data}:{data:[Course[], Skill[], Concept[]]}) => {
   }, []);
 */
 
-  const scrollHandler = useCallback(() => {
-    
-    },
-    [menu]
-  )
+  const scrollHandler = useCallback((event: React.MouseEvent | React.TouchEvent | null, data: Viewport)  => {
+    if (nodeElement && event && event.type == "wheel") {
+      const rect = nodeElement.getBoundingClientRect();
+      setMenu({
+        label: menu.label,
+        top: rect.top + rect.height,
+        left: rect.left + rect.width/2 - 100,
+        courseData: menu.courseData,
+        type: menu.type
+      })
+    }
+  }, [menu])
+
   return (
     <div className="flex m-10" style={{ width: width, height: height}}>
       {/*<ReactFlowProvider>*/}
@@ -188,7 +204,7 @@ const Graph = ({data}:{data:[Course[], Skill[], Concept[]]}) => {
           onNodeClick={handleClick}
           onNodeMouseEnter={(event, node) => {setNodeHovered(true); setHoveredNode(node); setHoverEvent(event)}}
           onNodeMouseLeave={(event, node) => {setNodeHovered(false); setHoveredNode(node); setHoverEvent(event)}}
-          onPaneScroll={scrollHandler}
+          onMove={scrollHandler}
           proOptions={{hideAttribution: true}}
           fitView
           minZoom={0.001}
