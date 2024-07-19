@@ -175,7 +175,7 @@ app.get('/concepts/:id', async (req, res) => {
   
   
   try {
-    const data = await Concept.find({"id": id});
+    const data = await Concept.findOne({"id": id});
     //console.log(data);
     res.send(data);
   } catch (err) {
@@ -377,7 +377,7 @@ app.get('/courses/:id', async (req, res) => {
   
 
   try {
-    const data = await Course.find({"id": id});
+    const data = await Course.findOne({"id": id});
     //console.log(data);
     res.send(data);
   } catch (err) {
@@ -577,7 +577,7 @@ app.get('/skills/:id', async (req, res) => {
   const id = req.params.id;
   
   try {
-    const data = await Skill.find({"id": id});
+    const data = await Skill.findOne({"id": id});
     console.log(1, data);
     res.send(data);
   } catch (err) {

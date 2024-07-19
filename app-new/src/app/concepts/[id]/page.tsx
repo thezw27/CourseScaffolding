@@ -1,10 +1,11 @@
 import React from 'react';
 import Header from "../../../components/header";
+import { Params, Course, Concept, Skill } from "@/contexts/PageContext";
 
-export default async function Page({params}) {
-  const resp = await fetch("http://localhost:3000/db/concepts/" + params.id);
-  const temp = await resp.json();
-  const data = temp[0];
+export default async function Page({ params }: { params: Params}) {
+  const resp = await fetch("http://localhost:3000/db/concepts/" + params.id, { cache: "no-cache" });
+  const data: Concept = await resp.json();
+  
 
   const conceptRelationList = populateConcepts(data);
   const relationships = populateRelationships(data);
@@ -26,7 +27,7 @@ export default async function Page({params}) {
   )
 }
   
-const populateConcepts = async (data) => {
+const populateConcepts = async (data: Concept) => {
 
   let prereqList = [];
   let coreqList = [];
@@ -35,9 +36,9 @@ const populateConcepts = async (data) => {
   for (let i = 0; i < data.prereqs.length; i++) {
     try {
       const resp = await fetch("http://localhost:3000/db/concepts/" + data.prereqs[i]);
-      const d = await resp.json();
+      const d: Concept = await resp.json();
 
-      prereqList.push(<li className="link" key={d[0].id}><a href= {'/concepts/' + d[0].id} > { d[0].concept_name } </a></li>);
+      prereqList.push(<li className="link" key={d.id}><a href= {'/concepts/' + d.id} > { d.concept_name } </a></li>);
     } catch (err) {
       console.log(err);
     }
@@ -46,9 +47,9 @@ const populateConcepts = async (data) => {
   for (let i = 0; i < data.coreqs.length; i++) {
     try {
       const resp = await fetch("http://localhost:3000/db/concepts/" + data.coreqs[i]);
-      const d = await resp.json();
+      const d: Concept = await resp.json();
 
-      coreqList.push(<li className="link" key={d[0].id}><a href= {'/concepts/' + d[0].id} > { d[0].concept_name } </a></li>);
+      coreqList.push(<li className="link" key={d.id}><a href= {'/concepts/' + d.id} > { d.concept_name } </a></li>);
     } catch (err) {
       console.log(err);
     }
@@ -57,9 +58,9 @@ const populateConcepts = async (data) => {
   for (let i = 0; i < data.followups.length; i++) {
     try {
       const resp = await fetch("http://localhost:3000/db/concepts/" + data.followups[i]);
-      const d = await resp.json();
+      const d: Concept = await resp.json();
 
-      followupList.push(<li className="link" key={d[0].id}><a href= {'/concepts/' + d[0].id} > { d[0].concept_name } </a></li>);
+      followupList.push(<li className="link" key={d.id}><a href= {'/concepts/' + d.id} > { d.concept_name } </a></li>);
     } catch (err) {
       console.log(err);
     }
@@ -81,17 +82,16 @@ const populateConcepts = async (data) => {
   );
 }
 
-const populateRelationships = async (data) => {
+const populateRelationships = async (data: Concept) => {
 
   let coursesList = [];
-  let conceptsList = [];
+  let skillsList = [];
 
   for (let i = 0; i < data.courses.length; i++) {
     try {
       const resp = await fetch("http://localhost:3000/db/courses/" + data.courses[i]);
-      const d = await resp.json();
-      console.log(d);
-      coursesList.push(<li className="link" key={d[0].id}><a href= {'/courses/' + d[0].id} > { d[0].course_name } </a></li>);
+      const d: Course = await resp.json();
+      coursesList.push(<li className="link" key={d.id}><a href= {'/courses/' + d.id} > { d.course_name } </a></li>);
     } catch (err) {
       console.log(err);
     }
@@ -100,9 +100,8 @@ const populateRelationships = async (data) => {
   for (let i = 0; i < data.skills.length; i++) {
     try {
       const resp = await fetch("http://localhost:3000/db/skills/" + data.skills[i]);
-      const d = await resp.json();
-
-      conceptsList.push(<li className="link" key={d[0].id}><a href= {'/skills/' + d[0].id} > { d[0].skill_name } </a></li>);
+      const d: Skill = await resp.json();
+      skillsList.push(<li className="link" key={d.id}><a href= {'/skills/' + d.id} > { d.skill_name } </a></li>);
     } catch (err) {
       console.log(err);
     }
@@ -115,7 +114,7 @@ const populateRelationships = async (data) => {
       <ul className="mb-4">{coursesList}</ul>
 
       <h3>Skills related to this concept</h3>
-      <ul className="mb-4">{conceptsList}</ul>
+      <ul className="mb-4">{skillsList}</ul>
 
     </div>
   );
