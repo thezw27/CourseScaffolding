@@ -98,3 +98,7 @@ body {
 .link {
   color: #0000EE
 }
+
+h3 {
+  @apply font-semibold
+}

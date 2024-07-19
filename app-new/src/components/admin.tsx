@@ -30,19 +30,19 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
   const [type, setType] = useState<'Courses' | 'Concepts' | 'Skills'>('Courses');
   const [form, setForm] = useState(<form></form>);
   
-  const [id, setId] = useState<number>();
+  const [id, setId] = useState<number>(0);
   
-  const [name, setName] = useState<string>();
-  const [desc, setDesc] = useState<string>();
-  const [deptcode, setDeptcode] = useState<string>();
-  const [coursecode, setCoursecode] = useState<string>();
-  const [concepts, setConcepts] = useState<MultiValue<SelectOption>>();
-  const [skills, setSkills] = useState<MultiValue<SelectOption>>();
-  const [courses, setCourses] = useState<MultiValue<SelectOption>>();
-  const [prereqs, setPrereqs] = useState<MultiValue<SelectOption>>();
-  const [coreqs, setCoreqs] = useState<MultiValue<SelectOption>>();
-  const [followups, setFollowups] = useState<MultiValue<SelectOption>>();
-  const [links, setLinks] = useState<Link[]>();
+  const [name, setName] = useState<string>('');
+  const [desc, setDesc] = useState<string>('');
+  const [deptcode, setDeptcode] = useState<string>('');
+  const [coursecode, setCoursecode] = useState<string>('');
+  const [concepts, setConcepts] = useState<MultiValue<SelectOption>>([]);
+  const [skills, setSkills] = useState<MultiValue<SelectOption>>([]);
+  const [courses, setCourses] = useState<MultiValue<SelectOption>>([]);
+  const [prereqs, setPrereqs] = useState<MultiValue<SelectOption>>([]);
+  const [coreqs, setCoreqs] = useState<MultiValue<SelectOption>>([]);
+  const [followups, setFollowups] = useState<MultiValue<SelectOption>>([]);
+  const [links, setLinks] = useState<Link[]>([]);
   const [buttonName, setButtonName] = useState<'Edit' | 'Create'>('Edit');
   const [options, setOptions] = useState<SelectOption[]>([]);
 
@@ -63,47 +63,55 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
 
   const handleSubmit = (event : React.ChangeEvent<HTMLSelectElement> | React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (buttonName == "Create") {
-      let postData;
-      if (type == 'Concepts') {
-        postData = {
-          "id": id,
-          "name": name,
-          "desc": desc,
-          "skills": [],
-          "courses": [],
-          "links": []
-        }
-      } else if (type == "Courses") {
-        postData = {
-          "id": id,
-          "depcode": deptcode,
-          "coursecode": coursecode,
-          "name": name,
-          "desc": desc,
-          "prereq": [],
-          "coreq": [],
-          "followups": [],
-          "skills": [],
-          "concepts": []
-        }
-      } else {
-        postData = {
-          "id": id,
-          "name": name,
-          "desc": desc,
-          "concepts": [],
-          "courses": [],
-          "links": []
-        }
+    
+    let reqData: Concept | Skill | Course;
+    if (type == 'Concepts') {
+      reqData = {
+        "id": id,
+        "concept_name": name,
+        "description": desc,
+        "skills": skills.map(o => o.value),
+        "courses": courses.map(o => o.value),
+        "prereqs": prereqs.map(o => o.value),
+        "followups": followups.map(o => o.value),
+        "coreqs": coreqs.map(o => o.value),
+        "links": []
       }
-
+    } else if (type == "Courses") {
+      reqData = {
+        "id": id,
+        "department_code": deptcode,
+        "course_code": coursecode,
+        "course_name": name,
+        "description": desc,
+        "skills": skills.map(o => o.value),
+        "concepts": concepts.map(o => o.value),
+        "prereqs": prereqs.map(o => o.value),
+        "followups": followups.map(o => o.value),
+        "coreqs": coreqs.map(o => o.value),
+        "links": []
+      }
+    } else {
+      reqData = {
+        "id": id,
+        "skill_name": name,
+        "description": desc,
+        "concepts": concepts.map(o => o.value),
+        "courses": courses.map(o => o.value),
+        "prereqs": prereqs.map(o => o.value),
+        "followups": followups.map(o => o.value),
+        "coreqs": coreqs.map(o => o.value),
+        "links": []
+      }
+    }
+    console.log(reqData);
+    if (buttonName == "Create") {
       fetch('http://localhost:3000/db/' + type.toLowerCase(), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(postData)
+        body: JSON.stringify(reqData)
       })
       .then(resp => {
         if (!resp.ok) {
@@ -118,35 +126,13 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
         console.log(err);
       })
     } else {
-      let putData = {};
-      if (type == 'Concepts') {
-        putData = {
-          "id": id,
-          "name": name,
-          "desc": desc
-        }
-      } else if (type == "Courses") {
-        putData = {
-          "id": id,
-          "depcode": deptcode,
-          "coursecode": coursecode,
-          "name": name,
-          "desc": desc
-        }
-      } else {
-        putData = {
-          "id": id,
-          "name": name,
-          "desc": desc
-        }
-      }
-
+      
       fetch('http://localhost:3000/db/' + type.toLowerCase() + '/' + id, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(putData)
+        body: JSON.stringify(reqData)
       })
       .then(resp => {
         if (!resp.ok) {
@@ -269,16 +255,16 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
               <Select styles={customStyles} options={conceptData.slice(1)} value={concepts} closeMenuOnSelect={false} components={animatedComponents} isMulti menuPlacement="top" onChange={(event) => {setConcepts(event)}}/>
               
               <label htmlFor="skillSelect">Connected Courses</label>
-              <Select styles={customStyles} options={skillData.slice(1)} value={courses} closeMenuOnSelect={false} components={animatedComponents} isMulti menuPlacement="top" onChange={(event) => {setCourses(event)}}/>
+              <Select styles={customStyles} options={courseData.slice(1)} value={courses} closeMenuOnSelect={false} components={animatedComponents} isMulti menuPlacement="top" onChange={(event) => {setCourses(event)}}/>
               
               <label htmlFor="conceptSelect">Prerequisite Skills</label>
-              <Select styles={customStyles} options={courseData.slice(1)} value={prereqs} closeMenuOnSelect={false} components={animatedComponents} isMulti menuPlacement="top" onChange={(event) => {setPrereqs(event)}}/>
+              <Select styles={customStyles} options={skillData.slice(1)} value={prereqs} closeMenuOnSelect={false} components={animatedComponents} isMulti menuPlacement="top" onChange={(event) => {setPrereqs(event)}}/>
               
               <label htmlFor="skillSelect">Corequisite Skills</label>
-              <Select styles={customStyles} options={courseData.slice(1)} value={coreqs} closeMenuOnSelect={false} components={animatedComponents} isMulti menuPlacement="top" onChange={(event) => {setCoreqs(event)}}/>
+              <Select styles={customStyles} options={skillData.slice(1)} value={coreqs} closeMenuOnSelect={false} components={animatedComponents} isMulti menuPlacement="top" onChange={(event) => {setCoreqs(event)}}/>
               
               <label htmlFor="conceptSelect">Follow up Skills</label>
-              <Select styles={customStyles} options={courseData.slice(1)} value={followups} closeMenuOnSelect={false} components={animatedComponents} isMulti menuPlacement="top" onChange={(event) => {setFollowups(event)}}/>
+              <Select styles={customStyles} options={skillData.slice(1)} value={followups} closeMenuOnSelect={false} components={animatedComponents} isMulti menuPlacement="top" onChange={(event) => {setFollowups(event)}}/>
               
               
               <button className="btn btn-primary" type="submit">{buttonName}</button>  
@@ -328,20 +314,24 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
   return (
     <div>
       <Header />
-      <div style={{ paddingTop: '10vh', width: 1200, height:800}} className="mx-auto w-1/2 flex flex-col">
+      <div style={{ width: 1200, height:800 }} className="mx-auto w-1/2 flex flex-col">
         <label htmlFor="type">Type</label>
         <Select 
           id="type"
           options={menuOptions} 
           defaultValue={menuOptions[0]}
           isSearchable={false}
-          onChange={(event) => setType((event as { value: string }).value as "Courses" | "Concepts" | "Skills" )}
+          onChange={(event) => {
+            setType((event as { value: string }).value as "Courses" | "Concepts" | "Skills" );
+            updateFields(0);
+          }}
         />
         <label htmlFor="objSelect">{type}</label>
         <Select
           id="objSelect" 
           options={options} 
           onChange={(event) => updateFields((event as { value: number}).value)} 
+          value={options[id+1]}
           />
         {form}
       </div>

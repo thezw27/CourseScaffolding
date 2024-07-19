@@ -20,14 +20,11 @@ import ELK from 'elkjs/lib/elk.bundled.js';
 
 const Graph = ({data}:{data:[Course[], Skill[], Concept[]]}) => {
 
-  const [tempL, setMid] = useState<number>(0);
-  const [tempR, setTop] = useState<number>(0);
-
   const [nodeElement, setNodeElement] = useState<Element | null>();
 
   const graphRef = useRef<HTMLDivElement | null>(null);
 
-  const width = '80vw';
+  const width = '90vw';
   const height = '80vh';
   const nodeWidth = 300;
   const nodeHeight = 70;
@@ -143,8 +140,6 @@ const Graph = ({data}:{data:[Course[], Skill[], Concept[]]}) => {
 
           console.log(nodeElement)
           if (tempNodeElement) {
-            setTop(tempNodeElement.top+tempNodeElement.height);
-            setMid(tempNodeElement.left+tempNodeElement.width/2);
             setMenu({
               label: hoveredNode.data.label,
               top: tempNodeElement.top + tempNodeElement.height,
@@ -178,7 +173,7 @@ const Graph = ({data}:{data:[Course[], Skill[], Concept[]]}) => {
   }, []);
 */
 
-  const scrollHandler = useCallback((event: React.MouseEvent | React.TouchEvent | null, data: Viewport)  => {
+  const scrollHandler = useCallback((event: MouseEvent | TouchEvent, viewport: Viewport) => {
     if (nodeElement && event && event.type == "wheel") {
       const rect = nodeElement.getBoundingClientRect();
       setMenu({

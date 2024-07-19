@@ -214,7 +214,6 @@ app.put('/concepts/:id',  async (req, res) => {
       "followups": followups,
       "skills": skills,
       "courses": courses,
-      "links": links
     })
     res.status(200);
     res.send({"Message": "Successfully updated!"});
@@ -604,7 +603,6 @@ app.put('/skills/:id',  async (req, res) => {
   const prereq = req.body.prereq;
   const coreq = req.body.coreqs;
   const followups = req.body.followups;
-
   
 
   try {
@@ -614,7 +612,9 @@ app.put('/skills/:id',  async (req, res) => {
       "description": desc,
       "concepts": concepts,
       "courses": courses,
-      "links": links
+      "prereqs": prereq,
+      "coreqs": coreq,
+      "followups": followups
     })
     
     res.status(200);

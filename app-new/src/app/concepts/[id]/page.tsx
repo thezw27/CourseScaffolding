@@ -13,7 +13,7 @@ export default async function Page({ params }: { params: Params}) {
   return (
     <main>
       <Header/>
-      <div className="flex flex-col justify-center" style={{paddingTop: '15vh'}}>
+      <div className="flex flex-col justify-center">
         <div>
           <h1 className="text-center text-3xl font-bold m-2">{data.concept_name}</h1>
           <p className="text-center m-2">{data.description}</p>

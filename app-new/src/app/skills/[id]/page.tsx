@@ -14,7 +14,7 @@ export default async function Page({ params }: { params: Params}) {
   return (
     <main>
       <Header/>
-      <div className="flex flex-col justify-center" >
+      <div className="flex flex-col justify-center">
         <div>
           <h1 className="text-center text-3xl font-bold m-2">{data.skill_name}</h1>
           <p className="text-center m-2">{data.description}</p>
@@ -124,15 +124,15 @@ const populateRelationships = async (data: Skill) => {
   );
 }
 
-const populateLinks = async (data) => {
+const populateLinks = async (data: Skill) => {
   let linkList = [];
   for (let i = 0; i < data.links.length; i++) {
     linkList.push(<li className="link"><a href={data.links[i].link}>{data.links[i].name}</a></li> )
   }
   return (
-    <div>
+    <div className="flex flex-col items-center">
       <h3>Resources</h3>
-      <ul className="mb-4">{linkList}</ul>
+      <ul className="mb-4 flex flex-col items-center">{linkList}</ul>
     </div>
   )
 }

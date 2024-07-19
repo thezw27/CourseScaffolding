@@ -12,7 +12,7 @@ export default async function Home() {
   return (
     <main>
       <Header />
-      <div className="flex items-center justify-between" style={{ paddingTop: "10vh" }}>
+      <div className="flex items-center justify-center">
         <Menu />
         <Graph data={data} />
       </div>
