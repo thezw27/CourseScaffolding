@@ -88,8 +88,7 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
         "concepts": concepts.map(o => o.value),
         "prereqs": prereqs.map(o => o.value),
         "followups": followups.map(o => o.value),
-        "coreqs": coreqs.map(o => o.value),
-        "links": []
+        "coreqs": coreqs.map(o => o.value)
       }
     } else {
       reqData = {
