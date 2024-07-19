@@ -8,11 +8,12 @@ export default async function Page({params}) {
 
   const skillRelationList = populateSkills(data);
   const relationships = populateRelationships(data);
+  const links = populateLinks(data);
 
   return (
     <main>
       <Header/>
-      <div className="flex flex-col justify-center" style={{paddingTop: '15vh'}}>
+      <div className="flex flex-col justify-center" >
         <div>
           <h1 className="text-center text-3xl font-bold m-2">{data.skill_name}</h1>
           <p className="text-center m-2">{data.description}</p>
@@ -21,7 +22,8 @@ export default async function Page({params}) {
           {skillRelationList}
           {relationships}
         </div>
-        </div>
+        {links}
+      </div>
     </main>
   )
 }
@@ -119,4 +121,17 @@ const populateRelationships = async (data) => {
 
     </div>
   );
+}
+
+const populateLinks = async (data) => {
+  let linkList = [];
+  for (let i = 0; i < data.links.length; i++) {
+    linkList.push(<li className="link"><a href={data.links[i].link}>{data.links[i].name}</a></li> )
+  }
+  return (
+    <div>
+      <h3>Resources</h3>
+      <ul className="mb-4">{linkList}</ul>
+    </div>
+  )
 }
