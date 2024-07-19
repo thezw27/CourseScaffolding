@@ -106,7 +106,7 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
     }
     console.log(reqData);
     if (buttonName == "Create") {
-      fetch('http://localhost:3000/db/' + type.toLowerCase(), {
+      fetch('http://67.242.77.142:8000/db/' + type.toLowerCase(), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -127,7 +127,7 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
       })
     } else {
       
-      fetch('http://localhost:3000/db/' + type.toLowerCase() + '/' + id, {
+      fetch('http://67.242.77.142:8000/db/' + type.toLowerCase() + '/' + id, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

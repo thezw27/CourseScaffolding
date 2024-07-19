@@ -1,4 +1,5 @@
 const express = require('express');
+const https = require('https');
 const cors = require('cors');
 const next = require('next');
 
@@ -8,10 +9,14 @@ const handle = nextapp.getRequestHandler();
 
 const db = require('./db');
 
+const corsOptions = {
+  origin: 'http://67.242.77.142:8000',
+  optionsSuccessStatus: 200
+};
 
 nextapp.prepare().then(() => {
   const app = express();
-  app.use(cors());
+  app.use(cors(corsOptions));
   const port = 3000;
 
   app.use('/db', db);
