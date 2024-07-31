@@ -87,12 +87,12 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
   const handleSubmit = (event : React.ChangeEvent<HTMLSelectElement> | React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     
-    let reqData: Concept | Skill | Course;
+    let reqData
     if (type == 'Concepts') {
       reqData = {
         "id": id,
-        "concept_name": name,
-        "description": desc,
+        "name": name,
+        "desc": desc,
         "skills": skills.map(o => o.value),
         "courses": courses.map(o => o.value),
         "prereqs": prereqs.map(o => o.value),
@@ -103,10 +103,10 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
     } else if (type == "Courses") {
       reqData = {
         "id": id,
-        "department_code": deptcode,
+        "name": deptcode,
         "course_code": coursecode,
         "course_name": name,
-        "description": desc,
+        "desc": desc,
         "skills": skills.map(o => o.value),
         "concepts": concepts.map(o => o.value),
         "prereqs": prereqs.map(o => o.value),
@@ -116,8 +116,8 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
     } else {
       reqData = {
         "id": id,
-        "skill_name": name,
-        "description": desc,
+        "name": name,
+        "desc": desc,
         "concepts": concepts.map(o => o.value),
         "courses": courses.map(o => o.value),
         "prereqs": prereqs.map(o => o.value),
@@ -126,7 +126,7 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
         "links": []
       }
     }
-
+    console.log(reqData);
     if (buttonName == "Create") {
       fetch('http://67.242.77.142:8000/db/' + type.toLowerCase(), {
         method: 'POST',
