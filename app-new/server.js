@@ -10,7 +10,8 @@ const handle = nextapp.getRequestHandler();
 const db = require('./db');
 
 const corsOptions = {
-  origin: 'http://67.242.77.142:8000',
+  //CHANGE BEFORE FINAL VERSION
+  origin: true,
   optionsSuccessStatus: 200
 };
 

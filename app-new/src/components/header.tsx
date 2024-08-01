@@ -3,9 +3,12 @@ import rpi200 from '../assets/RPI200.png';
 
 const Header = () => {
   return (
-    <header className="flex justify-between rpi-background" style={{ height: '10vh', width: "100vw" }}>
-      <a href="/" className="self-center ml-7" style={{ height: '50%' }}><img src={rpi200.src} className="self-center ml-7" style={{ height: '100%' }} alt="Rensselaer 200" /></a>
-      <a href="/admin" className="self-center btn-header btn-primary">Admin Portal</a>
+    <header className="flex justify-between rpi-background w-screen" style={{ height: '10vh' }}>
+      <div className="flex ml-7 justify-between w-1/4">
+        <a href="https://ecse.rpi.edu" style={{ height: '50%' }} className="self-center"><img src={rpi200.src} style={{ height: '100%' }} alt="Rensselaer 200" /></a>
+        <a href="/" className="self-center text-center btn-header btn-primary">Home</a>
+      </div>
+      <a href="/admin" className="self-center text-center btn-header btn-primary">Admin Portal</a>
     </header>
   )
 }

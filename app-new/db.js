@@ -88,8 +88,9 @@ app.post('/concepts', async (req, res) => {
   const skills = req.body.skills;
   const courses = req.body.courses;
   const links = req.body.links;
-
-  
+  const prereqs = req.body.prereqs;
+  const coreqs = req.body.coreqs;
+  const followups = req.body.followups;  
 
   try {
     const concept = new Concept({
@@ -98,6 +99,9 @@ app.post('/concepts', async (req, res) => {
       "description": desc,
       "skills": skills,
       "courses": courses,
+      "prereqs": prereqs,
+      "coreqs": coreqs,
+      "followups": followups,
       "links": links
     })
     await concept.save();

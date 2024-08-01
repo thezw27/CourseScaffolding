@@ -13,8 +13,8 @@ const Menu = () => {
   const vwToPx = (vw: number) => (vw / 100) * window.innerWidth;
   const vhToPx = (vh: number) => (vh / 100) * window.innerHeight;
 
-  const initialX = vwToPx(-30); // 10% of the viewport width
-  const initialY = vhToPx(-30); // 10% of the viewport height
+  const initialX = vwToPx(-30);
+  const initialY = vhToPx(-30);
   
   return (
     <Draggable nodeRef={draggableRef} defaultPosition={{ x: initialX, y: initialY }}>
