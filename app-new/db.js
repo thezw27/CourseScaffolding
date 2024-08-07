@@ -87,12 +87,11 @@ app.post('/concepts', async (req, res) => {
   const desc = req.body.desc;
   const skills = req.body.skills;
   const courses = req.body.courses;
-  const links = req.body.links;
   const prereqs = req.body.prereqs;
   const coreqs = req.body.coreqs;
   const followups = req.body.followups;  
-
   try {
+
     const concept = new Concept({
       "id": id,
       "concept_name": name,
@@ -101,10 +100,40 @@ app.post('/concepts', async (req, res) => {
       "courses": courses,
       "prereqs": prereqs,
       "coreqs": coreqs,
-      "followups": followups,
-      "links": links
+      "followups": followups
     })
     await concept.save();
+
+    for (const skill in skills) {
+      await Skill.updateOne({'id': skill}, {
+        $push: { concepts: id }
+      })
+    };
+
+    for (const course in courses) {
+      await Course.updateOne({'id': course}, {
+        $push: { concepts: id }
+      })
+    };
+
+    for (const prereq in prereqs) {
+      await Concept.updateOne({'id': prereq}, {
+        $push: { prereqs: id }
+      })
+    };
+
+    for (const coreqs in coreqs) {
+      await Concept.updateOne({'id': coreqs}, {
+        $push: { coreqs: id }
+      })
+    };
+
+    for (const followup in followups) {
+      await Concept.updateOne({'id': followup}, {
+        $push: { followups: id }
+      })
+    };
+
     res.status(201);
     res.send({"Message": "Success!"});
   } catch (err) {
@@ -202,7 +231,7 @@ app.put('/concepts/:id',  async (req, res) => {
   const desc = req.body.desc;
   const skills = req.body.skills;
   const courses = req.body.courses;
-  const links = req.body.links;
+  const links = req.body.link
   const prereq = req.body.prereq;
   const coreq = req.body.coreqs;
   const followups = req.body.followups;
@@ -280,12 +309,11 @@ app.post('/courses',  async (req, res) => {
   const coursecode = req.body.coursecode;
   const name = req.body.name;
   const desc = req.body.desc;
-  const prereq = req.body.prereq;
+  const prereq = req.body.prereqs;
   const coreq = req.body.coreqs;
   const followups = req.body.followups;
   const skills = req.body.skills;
   const concepts = req.body.courses;
-
   
 
   try {
@@ -302,6 +330,37 @@ app.post('/courses',  async (req, res) => {
       "concepts": concepts
     })
     await course.save();
+
+    for (const skill in skills) {
+      await Skill.updateOne({'id': skill}, {
+        $push: { concepts: id }
+      })
+    };
+
+    for (const concept in concepts) {
+      await Concept.updateOne({'id': concept}, {
+        $push: { courses: id }
+      })
+    };
+
+    for (const prereq in prereqs) {
+      await Course.updateOne({'id': prereq}, {
+        $push: { prereqs: id }
+      })
+    };
+
+    for (const coreqs in coreqs) {
+      await Course.updateOne({'id': coreqs}, {
+        $push: { coreqs: id }
+      })
+    };
+
+    for (const followup in followups) {
+      await Course.updateOne({'id': followup}, {
+        $push: { followups: id }
+      })
+    };
+    
     res.status(201);
     res.send({"Message": "Success!"});
   } catch (err) {
@@ -504,6 +563,37 @@ app.post('/skills', async (req, res) => {
       "links": links
     })
     await skill.save();
+
+    for (const course in courses) {
+      await Course.updateOne({'id': course}, {
+        $push: { skills: id }
+      })
+    };
+
+    for (const concept in concepts) {
+      await Concept.updateOne({'id': concept}, {
+        $push: { courses: id }
+      })
+    };
+
+    for (const prereq in prereqs) {
+      await Skill.updateOne({'id': prereq}, {
+        $push: { prereqs: id }
+      })
+    };
+
+    for (const coreqs in coreqs) {
+      await Skill.updateOne({'id': coreqs}, {
+        $push: { coreqs: id }
+      })
+    };
+
+    for (const followup in followups) {
+      await Skill.updateOne({'id': followup}, {
+        $push: { followups: id }
+      })
+    };
+
     res.status(201);
     res.send({"Message": "Success!"});
   } catch (err) {
@@ -652,4 +742,5 @@ app.delete('/skills/:id', async (req, res) => {
   ;
 
 })
+
 module.exports = app;

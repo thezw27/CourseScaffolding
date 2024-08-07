@@ -1,36 +1,29 @@
 'use client';
-import React, { useRef, useContext } from 'react';
+import React, { useRef, useContext} from 'react';
 import { DataContext } from '@/contexts/PageContext';
-import Draggable from 'react-draggable';
-import Input from './input';
+import Draggable, { DraggableEvent } from 'react-draggable';
 import Button from './button';
 
 const Menu = () => {
-  const draggableRef = useRef(null);
 
   const { setGraphType } = useContext(DataContext);
+  const draggableRef = useRef(null);
 
-  const vwToPx = (vw: number) => (vw / 100) * window.innerWidth;
-  const vhToPx = (vh: number) => (vh / 100) * window.innerHeight;
-
-  const initialX = vwToPx(-30);
-  const initialY = vhToPx(-30);
-  
   return (
-    <Draggable nodeRef={draggableRef} defaultPosition={{ x: initialX, y: initialY }}>
-      <div style={{ width: '25vw', position: "absolute", zIndex: "1",}} ref={draggableRef} className=" flex border-2 bg-gray-400 p-5">
-    {/*`<div className="flex">
-          <Input />
-          <Button label='Search' />
-        </div>`*/}
-      
-          <Button label="Courses" clickHandler={setGraphType}/>
-          <Button label="Skills" clickHandler={setGraphType}/>
-          <Button label="Concepts" clickHandler={setGraphType}/>
-          {/*<Button label="Help" />*/}
+    <Draggable nodeRef={draggableRef} positionOffset={{ x: '-30vw', y: '-30vh' }} >
+        <div style={{ width: '25vw', position: "absolute", zIndex: "1",}} ref={draggableRef} className=" flex border-2 bg-gray-400 p-5">
+      {/*`<div className="flex">
+            <Input />
+            <Button label='Search' />
+          </div>`*/}
         
-      </div>
-    </Draggable>
+            <Button label="Courses" clickHandler={setGraphType}/>
+            <Button label="Skills" clickHandler={setGraphType}/>
+            <Button label="Concepts" clickHandler={setGraphType}/>
+            {/*<Button label="Help" />*/}
+          
+        </div>
+      </Draggable>
   );
 };
 

@@ -24,7 +24,7 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
     } else {
       return -1;
     }
-  }
+  };
 
   const courseData: SelectOption[] = data[0]
     .map(({ id, course_name } : { id:number, course_name:string }) => ({ label: course_name, value: id }))
@@ -103,9 +103,9 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
     } else if (type == "Courses") {
       reqData = {
         "id": id,
-        "name": deptcode,
-        "course_code": coursecode,
-        "course_name": name,
+        "name": name,
+        "depcode": deptcode,
+        "coursecode": coursecode,
         "desc": desc,
         "skills": skills.map(o => o.value),
         "concepts": concepts.map(o => o.value),
@@ -142,6 +142,7 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
         
         alert("Success!");
         console.log("Success!");
+        window.location.href = "/admin";
       })
       .catch(err => {
         alert('ERROR!: ' + err)
@@ -160,7 +161,10 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
         if (!resp.ok) {
           throw new Error("Update Failed. " + resp.statusText);
         }
+        
+        alert("Success!");
         console.log("Success!");
+        window.location.href = "/admin";
       })
       .catch(err => {
         console.log(err);
