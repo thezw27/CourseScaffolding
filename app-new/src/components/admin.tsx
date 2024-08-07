@@ -161,7 +161,6 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
         if (!resp.ok) {
           throw new Error("Update Failed. " + resp.statusText);
         }
-        
         alert("Success!");
         console.log("Success!");
         window.location.href = "/admin";
