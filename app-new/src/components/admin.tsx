@@ -131,7 +131,7 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
     }
 
     if (e == "create") {
-      fetch('http://localhost:3000/db/' + type.toLowerCase(), {
+      fetch('http://67.242.77.142:8000/db/' + type.toLowerCase(), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -153,7 +153,7 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
       })
     } else if (e == "edit") {
       
-      fetch('http://localhost:3000/db/' + type.toLowerCase() + '/' + id, {
+      fetch('http://67.242.77.142:8000/db/' + type.toLowerCase() + '/' + id, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -174,7 +174,7 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
       })
     } else if (e == "delete") {
       console.log(id);
-      fetch('http://localhost:3000/db/' + type.toLowerCase() + '/' + id, {
+      fetch('http://67.242.77.142:8000/db/' + type.toLowerCase() + '/' + id, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
