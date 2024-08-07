@@ -118,7 +118,7 @@ app.post('/concepts', async (req, res) => {
 
     for (const prereq in prereqs) {
       await Concept.updateOne({'id': prereq}, {
-        $push: { prereqs: id }
+        $push: { followups: id }
       })
     };
 
@@ -130,7 +130,7 @@ app.post('/concepts', async (req, res) => {
 
     for (const followup in followups) {
       await Concept.updateOne({'id': followup}, {
-        $push: { followups: id }
+        $push: { prereqs: id }
       })
     };
 
@@ -309,7 +309,7 @@ app.post('/courses',  async (req, res) => {
   const coursecode = req.body.coursecode;
   const name = req.body.name;
   const desc = req.body.desc;
-  const prereq = req.body.prereqs;
+  const prereqs = req.body.prereqs;
   const coreq = req.body.coreqs;
   const followups = req.body.followups;
   const skills = req.body.skills;
@@ -323,7 +323,7 @@ app.post('/courses',  async (req, res) => {
       "course_code": coursecode,
       "course_name": name,
       "description": desc,
-      "prereqs": prereq,
+      "prereqs": prereqs,
       "coreqs": coreq,
       "followups": followups,
       "skills": skills,
@@ -345,7 +345,7 @@ app.post('/courses',  async (req, res) => {
 
     for (const prereq in prereqs) {
       await Course.updateOne({'id': prereq}, {
-        $push: { prereqs: id }
+        $push: { followups: id }
       })
     };
 
@@ -357,7 +357,7 @@ app.post('/courses',  async (req, res) => {
 
     for (const followup in followups) {
       await Course.updateOne({'id': followup}, {
-        $push: { followups: id }
+        $push: { prereqs: id }
       })
     };
     
@@ -578,7 +578,7 @@ app.post('/skills', async (req, res) => {
 
     for (const prereq in prereqs) {
       await Skill.updateOne({'id': prereq}, {
-        $push: { prereqs: id }
+        $push: { followups: id }
       })
     };
 
@@ -590,7 +590,7 @@ app.post('/skills', async (req, res) => {
 
     for (const followup in followups) {
       await Skill.updateOne({'id': followup}, {
-        $push: { followups: id }
+        $push: { prereqs: id }
       })
     };
 
