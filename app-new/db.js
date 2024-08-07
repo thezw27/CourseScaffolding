@@ -312,7 +312,7 @@ app.post('/courses',  async (req, res) => {
   const name = req.body.name;
   const desc = req.body.desc;
   const prereqs = req.body.prereqs;
-  const coreq = req.body.coreqs;
+  const coreqs = req.body.coreqs;
   const followups = req.body.followups;
   const skills = req.body.skills;
   const concepts = req.body.courses;  
@@ -327,7 +327,7 @@ app.post('/courses',  async (req, res) => {
       "course_name": name,
       "description": desc,
       "prereqs": prereqs,
-      "coreqs": coreq,
+      "coreqs": coreqs,
       "followups": followups,
       "skills": skills,
       "concepts": concepts
