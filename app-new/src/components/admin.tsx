@@ -361,7 +361,7 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
   const handleResourceButton = (reqType: 'create' | 'edit' | 'delete') => {
 
     if (reqType == 'create') {
-      fetch('http://localhost:3000/db/resources/' + type.toLowerCase() + '/' + id, {
+      fetch('http://67.242.77.142:8000/db/resources/' + type.toLowerCase() + '/' + id, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -386,7 +386,7 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
         console.log(err);
       })
     } else if (reqType == 'edit') {
-      fetch('http://localhost:3000/db/resources/' + type.toLowerCase() + '/' + id, {
+      fetch('http://67.242.77.142:8000/db/resources/' + type.toLowerCase() + '/' + id, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -411,7 +411,7 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
         console.log(err);
       })
     } else if (reqType == 'delete') {
-      fetch('http://localhost:3000/db/resources/' + type.toLowerCase() + '/' + id, {
+      fetch('http://67.242.77.142:8000/db/resources/' + type.toLowerCase() + '/' + id, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
