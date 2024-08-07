@@ -90,6 +90,8 @@ app.post('/concepts', async (req, res) => {
   const prereqs = req.body.prereqs;
   const coreqs = req.body.coreqs;
   const followups = req.body.followups;  
+
+
   try {
 
     const concept = new Concept({
@@ -313,8 +315,9 @@ app.post('/courses',  async (req, res) => {
   const coreq = req.body.coreqs;
   const followups = req.body.followups;
   const skills = req.body.skills;
-  const concepts = req.body.courses;
-  
+  const concepts = req.body.courses;  
+
+  console.log(req.body);
 
   try {
     const course = new Course({
@@ -364,7 +367,7 @@ app.post('/courses',  async (req, res) => {
     res.status(201);
     res.send({"Message": "Success!"});
   } catch (err) {
-    //console.log(err);
+    console.log(err);
   }
 
   ;

@@ -240,18 +240,18 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
         setName(data[i][event].course_name);
         setDeptcode(data[i][event].department_code);
         setCoursecode(data[i][event].course_code);
-        setConcepts(data[i][event].concepts.map(k => conceptData.slice(1)[k]));
-        setSkills(data[i][event].skills.map(k => skillData.slice(1)[k]));
-        setPrereqs(data[i][event].prereqs.map(k => courseData.slice(1)[k]));
-        setCoreqs(data[i][event].coreqs.map(k => courseData.slice(1)[k]));
-        setFollowups(data[i][event].followups.map(k => courseData.slice(1)[k]));
+        setConcepts(data[i][event].concepts.map(id => conceptData.find(c => c.value === id)).filter((c): c is SelectOption => c !== undefined));
+        setSkills(data[i][event].skills.map(id => skillData.find(c => c.value === id)).filter((c): c is SelectOption => c !== undefined));
+        setPrereqs(data[i][event].prereqs.map(id => courseData.find(c => c.value === id)).filter((c): c is SelectOption => c !== undefined));
+        setCoreqs(data[i][event].coreqs.map(id => courseData.find(c => c.value === id)).filter((c): c is SelectOption => c !== undefined));
+        setFollowups(data[i][event].followups.map(id => courseData.find(c => c.value === id)).filter((c): c is SelectOption => c !== undefined));
       } else if (i == 1) {
         setName(data[i][event].skill_name);
-        setConcepts(data[i][event].concepts.map(k => conceptData.slice(1)[k]));
-        setCourses(data[i][event].courses.map(k => courseData.slice(1)[k]));
-        setPrereqs(data[i][event].prereqs.map(k => skillData.slice(1)[k]));
-        setCoreqs(data[i][event].coreqs.map(k => skillData.slice(1)[k]));
-        setFollowups(data[i][event].followups.map(k => skillData.slice(1)[k]));
+        setConcepts(data[i][event].concepts.map(id => conceptData.find(c => c.value === id)).filter((c): c is SelectOption => c !== undefined));
+        setCourses(data[i][event].courses.map(id => courseData.find(c => c.value === id)).filter((c): c is SelectOption => c !== undefined));
+        setPrereqs(data[i][event].prereqs.map(id => skillData.find(c => c.value === id)).filter((c): c is SelectOption => c !== undefined));
+        setCoreqs(data[i][event].coreqs.map(id => skillData.find(c => c.value === id)).filter((c): c is SelectOption => c !== undefined));
+        setFollowups(data[i][event].followups.map(id => skillData.find(c => c.value === id)).filter((c): c is SelectOption => c !== undefined));
         setResources(data[i][event].links);
         let cntr = 0;
         setResourceOptions(data[i][event].links.map(({ name } : { name:string }) => ({ 
@@ -260,11 +260,11 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
         })));
       } else if (i == 2) {
         setName(data[i][event].concept_name);
-        setSkills(data[i][event].skills.map(k => skillData.slice(1)[k]));
-        setCourses(data[i][event].courses.map(k => courseData.slice(1)[k]));
-        setPrereqs(data[i][event].prereqs.map(k => conceptData.slice(1)[k]));
-        setCoreqs(data[i][event].coreqs.map(k => conceptData.slice(1)[k]));
-        setFollowups(data[i][event].followups.map(k => conceptData.slice(1)[k]));
+        setSkills(data[i][event].skills.map(id => skillData.find(c => c.value === id)).filter((c): c is SelectOption => c !== undefined));
+        setCourses(data[i][event].courses.map(id => courseData.find(c => c.value === id)).filter((c): c is SelectOption => c !== undefined));
+        setPrereqs(data[i][event].prereqs.map(id => conceptData.find(c => c.value === id)).filter((c): c is SelectOption => c !== undefined));
+        setCoreqs(data[i][event].coreqs.map(id => conceptData.find(c => c.value === id)).filter((c): c is SelectOption => c !== undefined));
+        setFollowups(data[i][event].followups.map(id => conceptData.find(c => c.value === id)).filter((c): c is SelectOption => c !== undefined));
         setResources(data[i][event].links);
         let cntr = 0;
         setResourceOptions(data[i][event].links.map(({ name } : { name:string }) => ({ 
@@ -337,7 +337,7 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
               <Select styles={customStyles} options={courseData.slice(1)} value={coreqs} closeMenuOnSelect={false} components={animatedComponents} isMulti menuPlacement="top" onChange={(event) => {setCoreqs(event)}}/>
               
               <label htmlFor="conceptSelect">Follow up Courses</label>
-              <Select styles={customStyles} options={courseData.slice(1)} value={followups} closeMenuOnSelect={false} components={animatedComponents} isMulti menuPlacement="top" onChange={(event) => {setFollowups(event)}}/>
+              <Select styles={customStyles} options={courseData.slice(1)} value={followups} closeMenuOnSelect={false} components={animatedComponents} isMulti menuPlacement="top" onChange={(event) => {console.log(event); setFollowups(event)}}/>
               
               <button className="btn btn-primary" type="submit">{buttonName}</button>
             </form>
