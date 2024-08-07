@@ -585,7 +585,7 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
         )
         break;
     }
-  }, [type, id, name, deptcode, coursecode, desc, concepts, courses, prereqs, coreqs, skills, followups, resourceEditToggle, resourceLink, resourceName, resourceType, resourceButton, selectedResource, resourceMenuButton, button])
+  }, [type, id, name, deptcode, coursecode, desc, concepts, courses, prereqs, coreqs, skills, followups, resourceEditToggle, resourceLink, resourceName, resourceType, resourceButton, selectedResource, resourceMenuButton, button, resourceId])
 
   return (
     <div>
