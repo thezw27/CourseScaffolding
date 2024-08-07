@@ -352,8 +352,8 @@ app.post('/courses',  async (req, res) => {
       })
     };
 
-    for (const coreqs in coreqs) {
-      await Course.updateOne({'id': coreqs}, {
+    for (const coreq in coreqs) {
+      await Course.updateOne({'id': coreq}, {
         $push: { coreqs: id }
       })
     };
