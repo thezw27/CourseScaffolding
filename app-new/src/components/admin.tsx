@@ -64,12 +64,14 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
   const [resourceName, setResourceName] = useState<string>('');
   const [resourceLink, setResourceLink] = useState<string>('');
   const [resourceType, setResourceType] = useState<'video' | 'article'>('video');
-  const [buttonName, setButtonName] = useState<'Edit' | 'Create'>('Edit');
   const [options, setOptions] = useState<SelectOption[]>([]);
   const [resourceEditToggle, setResourceEditToggle] = useState<'hidden' | 'block'>('hidden');
   //0 is none, 1 is create, 2 is edit/delete
   const [resourceButtonId, setResourceButtonId] = useState<number>(0);
-  const [selectedResource, setSelectedResource] = useState<SingleValue<SelectOption>>()
+  const [selectedResource, setSelectedResource] = useState<SingleValue<SelectOption>>();
+  
+  const [buttonType, setButtonType] = useState<'exists' | 'new'>('new');
+  const [button, setButton] = useState<React.JSX.Element>();
 
   const menuOptions = [
     {
@@ -86,8 +88,7 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
     }
   ]
 
-  const handleSubmit = (event : React.ChangeEvent<HTMLSelectElement> | React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  const handleSubmit = (e: string) => {
     
     let reqData
     if (type == 'Concepts') {
@@ -128,8 +129,8 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
         "links": resources
       }
     }
-    console.log(reqData);
-    if (buttonName == "Create") {
+
+    if (e == "create") {
       fetch('http://localhost:3000/db/' + type.toLowerCase(), {
         method: 'POST',
         headers: {
@@ -150,7 +151,7 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
         alert('ERROR!: ' + err)
         console.log(err);
       })
-    } else {
+    } else if (e == "edit") {
       
       fetch('http://localhost:3000/db/' + type.toLowerCase() + '/' + id, {
         method: 'PUT',
@@ -171,16 +172,36 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
         console.log(err);
         alert("Error! " + err);
       })
+    } else if (e == "delete") {
+      console.log(id);
+      fetch('http://localhost:3000/db/' + type.toLowerCase() + '/' + id, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      })
+      .then(resp => {
+        if (!resp.ok) {
+          throw new Error("Delete Failed. " + resp.statusText);
+        }
+        alert("Success!");
+        console.log("Success!");
+        window.location.href = "/admin";
+      })
+      .catch(err => {
+        console.log(err);
+        alert("Error! " + err);
+      })
     }
-  }
+  };
 
   const editResources = () => {
     setResourceEditToggle('block');
-  }
+  };
   const closeResources = () => {
     setResourceEditToggle('hidden');
     setSelectedResource(undefined);
-  }
+  };
   const updateFields = (event: number, setType = 'none') => {
     let i = 0;
     if (setType == 'none') {
@@ -216,14 +237,14 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
     }
 
     //If event == new course
-    if (event == data[i].length) {
+    if (event == Math.max(...data[i].map(item => item.id)) + 1 || event == 0) {
 
-      setId(data[i].length);
+      setId(Math.max(...data[i].map(item => item.id)) + 1);
       setName("Add a name");
       setDesc("Add a description");
       setDeptcode("What department is this course in?");
       setCoursecode("What is the 4 digit course code for this class?");
-      setButtonName("Create");
+      setButtonType("new");
       setCourses([]);
       setConcepts([]);
       setSkills([]);
@@ -240,44 +261,47 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
 
     } else {
 
-      setDesc(data[i][event].description);
-      setId(data[i][event].id);
-      setButtonName("Edit");
+      console.log(event);
+      console.log(data[i]);
+      console.log(data[i].find(obj => obj.id == event)!);
+      setDesc(data[i].find(obj => obj.id === event)!.description);
+      setId(data[i].find(obj => obj.id === event)!.id);
+      setButtonType("exists");
       
       toggleResourceMenuButton(1);
 
       if (i == 0) {
-        setName(data[i][event].course_name);
-        setDeptcode(data[i][event].department_code);
-        setCoursecode(data[i][event].course_code);
-        setConcepts(data[i][event].concepts.map(id => conceptData.find(c => c.value === id)).filter((c): c is SelectOption => c !== undefined));
-        setSkills(data[i][event].skills.map(id => skillData.find(c => c.value === id)).filter((c): c is SelectOption => c !== undefined));
-        setPrereqs(data[i][event].prereqs.map(id => courseData.find(c => c.value === id)).filter((c): c is SelectOption => c !== undefined));
-        setCoreqs(data[i][event].coreqs.map(id => courseData.find(c => c.value === id)).filter((c): c is SelectOption => c !== undefined));
-        setFollowups(data[i][event].followups.map(id => courseData.find(c => c.value === id)).filter((c): c is SelectOption => c !== undefined));
+        setName(data[i].find(obj => obj.id === event)!.course_name);
+        setDeptcode(data[i].find(obj => obj.id === event)!.department_code);
+        setCoursecode(data[i].find(obj => obj.id === event)!.course_code);
+        setConcepts(data[i].find(obj => obj.id === event)!.concepts.map(id => conceptData.find(c => c.value === id)).filter((c): c is SelectOption => c !== undefined));
+        setSkills(data[i].find(obj => obj.id === event)!.skills.map(id => skillData.find(c => c.value === id)).filter((c): c is SelectOption => c !== undefined));
+        setPrereqs(data[i].find(obj => obj.id === event)!.prereqs.map(id => courseData.find(c => c.value === id)).filter((c): c is SelectOption => c !== undefined));
+        setCoreqs(data[i].find(obj => obj.id === event)!.coreqs.map(id => courseData.find(c => c.value === id)).filter((c): c is SelectOption => c !== undefined));
+        setFollowups(data[i].find(obj => obj.id === event)!.followups.map(id => courseData.find(c => c.value === id)).filter((c): c is SelectOption => c !== undefined));
       } else if (i == 1) {
-        setName(data[i][event].skill_name);
-        setConcepts(data[i][event].concepts.map(id => conceptData.find(c => c.value === id)).filter((c): c is SelectOption => c !== undefined));
-        setCourses(data[i][event].courses.map(id => courseData.find(c => c.value === id)).filter((c): c is SelectOption => c !== undefined));
-        setPrereqs(data[i][event].prereqs.map(id => skillData.find(c => c.value === id)).filter((c): c is SelectOption => c !== undefined));
-        setCoreqs(data[i][event].coreqs.map(id => skillData.find(c => c.value === id)).filter((c): c is SelectOption => c !== undefined));
-        setFollowups(data[i][event].followups.map(id => skillData.find(c => c.value === id)).filter((c): c is SelectOption => c !== undefined));
-        setResources(data[i][event].links);
+        setName(data[i].find(obj => obj.id === event)!.skill_name);
+        setConcepts(data[i].find(obj => obj.id === event)!.concepts.map(id => conceptData.find(c => c.value === id)).filter((c): c is SelectOption => c !== undefined));
+        setCourses(data[i].find(obj => obj.id === event)!.courses.map(id => courseData.find(c => c.value === id)).filter((c): c is SelectOption => c !== undefined));
+        setPrereqs(data[i].find(obj => obj.id === event)!.prereqs.map(id => skillData.find(c => c.value === id)).filter((c): c is SelectOption => c !== undefined));
+        setCoreqs(data[i].find(obj => obj.id === event)!.coreqs.map(id => skillData.find(c => c.value === id)).filter((c): c is SelectOption => c !== undefined));
+        setFollowups(data[i].find(obj => obj.id === event)!.followups.map(id => skillData.find(c => c.value === id)).filter((c): c is SelectOption => c !== undefined));
+        setResources(data[i].find(obj => obj.id === event)!.links);
         let cntr = 0;
-        setResourceOptions(data[i][event].links.map(({ name } : { name:string }) => ({ 
+        setResourceOptions(data[i].find(obj => obj.id === event)!.links.map(({ name } : { name:string }) => ({ 
           label: name, 
           value: cntr++ 
         })));
       } else if (i == 2) {
-        setName(data[i][event].concept_name);
-        setSkills(data[i][event].skills.map(id => skillData.find(c => c.value === id)).filter((c): c is SelectOption => c !== undefined));
-        setCourses(data[i][event].courses.map(id => courseData.find(c => c.value === id)).filter((c): c is SelectOption => c !== undefined));
-        setPrereqs(data[i][event].prereqs.map(id => conceptData.find(c => c.value === id)).filter((c): c is SelectOption => c !== undefined));
-        setCoreqs(data[i][event].coreqs.map(id => conceptData.find(c => c.value === id)).filter((c): c is SelectOption => c !== undefined));
-        setFollowups(data[i][event].followups.map(id => conceptData.find(c => c.value === id)).filter((c): c is SelectOption => c !== undefined));
-        setResources(data[i][event].links);
+        setName(data[i].find(obj => obj.id === event)!.concept_name);
+        setSkills(data[i].find(obj => obj.id === event)!.skills.map(id => skillData.find(c => c.value === id)).filter((c): c is SelectOption => c !== undefined));
+        setCourses(data[i].find(obj => obj.id === event)!.courses.map(id => courseData.find(c => c.value === id)).filter((c): c is SelectOption => c !== undefined));
+        setPrereqs(data[i].find(obj => obj.id === event)!.prereqs.map(id => conceptData.find(c => c.value === id)).filter((c): c is SelectOption => c !== undefined));
+        setCoreqs(data[i].find(obj => obj.id === event)!.coreqs.map(id => conceptData.find(c => c.value === id)).filter((c): c is SelectOption => c !== undefined));
+        setFollowups(data[i].find(obj => obj.id === event)!.followups.map(id => conceptData.find(c => c.value === id)).filter((c): c is SelectOption => c !== undefined));
+        setResources(data[i].find(obj => obj.id === event)!.links);
         let cntr = 0;
-        setResourceOptions(data[i][event].links.map(({ name } : { name:string }) => ({ 
+        setResourceOptions(data[i].find(obj => obj.id === event)!.links.map(({ name } : { name:string }) => ({ 
           label: name, 
           value: cntr++ 
         })));
@@ -286,7 +310,7 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
       setResourceLink('');
       setResourceType('video');
     }
-  } 
+  };
 
   const toggleResourceMenuButton = (e: number) => {
     if (e == 1) {
@@ -298,7 +322,7 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
         <button className="btn btn-primary opacity-50 cursor-not-allowed" type="button">Create the {type.toLowerCase().slice(0, -1)} before adding resources!</button>
       )
     }
-  }
+  };
 
   const updateResourceFields = (event:string) => {
     const resource =  resources.find(obj => obj.name === event);
@@ -315,7 +339,7 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
       setResourceId(resources.length > 0 ? Math.max(...resources.map(link => link.id)) + 1 : 0);
       setResourceButtonId(1);
     }
-  }
+  };
 
   useEffect(() => {
     if (resourceButtonId == 1) {
@@ -335,7 +359,6 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
   }, [resourceButtonId]);
 
   const handleResourceButton = (reqType: 'create' | 'edit' | 'delete') => {
-
 
     if (reqType == 'create') {
       fetch('http://localhost:3000/db/resources/' + type.toLowerCase() + '/' + id, {
@@ -410,14 +433,31 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
         console.log(err);
       })
     }
-  }
+  };
+
+  useEffect(() => {
+    if (buttonType == "new") {
+      setButton(
+        <div>
+          <button className="btn btn-primary" type="button" onClick={() => handleSubmit('create')}>Create</button>   
+        </div>
+      )
+    } else {
+      setButton(
+        <div>
+          <button className="btn btn-primary" type="button" onClick={() => handleSubmit('edit')}>Edit</button>
+          <button className="btn btn-danger" type="button" onClick={() => handleSubmit('delete')}>Delete</button>
+        </div>
+      )
+    }
+  }, [buttonType]);
 
   useEffect(() => {
     switch (type) {
       case 'Courses':
         setOptions(courseData);
         setForm(
-            <form className="flex flex-col m-1" onSubmit={(event) => handleSubmit(event)}>
+            <form className="flex flex-col m-1">
               
               <Input name="Course Name" id="name" setter={setName} value={name} />
               <Input name="Department" id="dept" setter={setDeptcode} value={deptcode} />
@@ -439,14 +479,14 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
               <label htmlFor="conceptSelect">Follow up Courses</label>
               <Select styles={customStyles} options={courseData.slice(1)} value={followups} closeMenuOnSelect={false} components={animatedComponents} isMulti menuPlacement="top" onChange={(event) => {console.log(event); setFollowups(event)}}/>
               
-              <button className="btn btn-primary" type="submit">{buttonName}</button>
+              {button}
             </form>
         )
         break;
       case 'Skills':
         setOptions(skillData);
         setForm(
-            <form className="flex flex-col m-1" onSubmit={(event) => handleSubmit(event)}>
+            <form className="flex flex-col m-1">
               
               <Input name="Skill Name" id="name" setter={setName} value={name} />
               <Input name="Description" id="desc" setter={setDesc} value={desc} /> 
@@ -485,7 +525,7 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
                 <button className="btn btn-primary" type="button" onClick={closeResources}>Close</button>
               </div>
 
-              <button className="btn btn-primary" type="submit">{buttonName}</button>  
+              {button}
 
             </form>
         )
@@ -494,7 +534,7 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
         setOptions(conceptData);
         setForm(
           
-            <form className="flex flex-col m-1" onSubmit={(event) => handleSubmit(event)}>
+            <form className="flex flex-col m-1">
               
               <Input name="Course Name" id="name" setter={setName} value={name} />
               <Input name="Description" id="desc" setter={setDesc} value={desc} />  
@@ -534,7 +574,7 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
                 <button className="btn btn-primary" type="button" onClick={closeResources}>Close</button>
               </div>
               
-              <button className="btn btn-primary" type="submit">{buttonName}</button>   
+              {button}
 
             </form>
         )
@@ -545,7 +585,7 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
         )
         break;
     }
-  }, [type, id, name, deptcode, coursecode, desc, concepts, courses, prereqs, coreqs, skills, followups, resourceEditToggle, resourceLink, resourceName, resourceType, resourceButton, selectedResource, resourceMenuButton])
+  }, [type, id, name, deptcode, coursecode, desc, concepts, courses, prereqs, coreqs, skills, followups, resourceEditToggle, resourceLink, resourceName, resourceType, resourceButton, selectedResource, resourceMenuButton, button])
 
   return (
     <div>
