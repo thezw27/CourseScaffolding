@@ -872,11 +872,11 @@ app.post('/resources/:type/:id', async (req, res) => {
 
   try {
     let resource;
-    if (type == 'skill') {
+    if (type == 'skills') {
 
       resource = await Skill.findOne({ 'id': id });
 
-    } else if (type == 'concept') {
+    } else if (type == 'concepts') {
 
       resource = await Concept.findOne({ 'id': id });
 
@@ -884,6 +884,7 @@ app.post('/resources/:type/:id', async (req, res) => {
       throw new Error("Invalid Type");
     }
 
+    console.log(resource);
     const obj = {
       'id': linkId,
       'name': name,
@@ -915,23 +916,23 @@ app.put('/resources/:type/:id', async (req, res) => {
 
   try {
     let resource;
-    if (type == 'skill') {
+    if (type == 'skills') {
 
       resource = await Skill.findOne({ 'id': id });
 
-    } else if (type == 'concept') {
+    } else if (type == 'concepts') {
 
       resource = await Concept.findOne({ 'id': id });
 
     } else {
       throw new Error("Invalid Type");
     }
-
-    const linkToUpdate = resource.links.id(linkId);
+    
+    const linkToUpdate = resource.links.find(link => link.id === linkId);
 
     linkToUpdate.name = name;
     linkToUpdate.type = linkType;
-    linkToUpdate.link = link;
+    linkToUpdate.link = link;   
     
     await resource.save();
 
@@ -948,21 +949,21 @@ app.delete('/resources/:type/:id/', async (req, res) => {
 
   const type = req.params.type;
   const id = req.params.id;
-  const linkId = req.body.linkId;
+  const linkId = req.body.id;
 
   try {
     let resource;
-    if (type === 'skill') {
+    if (type === 'skills') {
       resource = await Skill.findOne({ 'id': id });
-    } else if (type === 'concept') {
+    } else if (type === 'concepts') {
       resource = await Concept.findOne({ 'id': id });
     } else {
       throw new Error("Invalid Type");
     }
 
-    const linkToDelete = resource.links.id(linkId);
+    const linkToDelete = resource.links.findIndex(link => link.id === linkId);
 
-    linkToDelete.remove();
+    resource.links.splice(linkToDelete, 1);
     await resource.save();
 
     res.status(200).send({ "Message": "Link deleted successfully" });
