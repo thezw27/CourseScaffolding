@@ -304,8 +304,6 @@ app.get('/courses', async (req, res) => {
 
 app.post('/courses',  async (req, res) => {
 
-  console.log(req.body);
-
   const id = req.body.id;
   const depcode = req.body.depcode;
   const coursecode = req.body.coursecode;
@@ -316,8 +314,6 @@ app.post('/courses',  async (req, res) => {
   const followups = req.body.followups;
   const skills = req.body.skills;
   const concepts = req.body.courses;  
-
-  console.log(req.body);
 
   try {
     const course = new Course({
@@ -334,43 +330,42 @@ app.post('/courses',  async (req, res) => {
     })
     await course.save();
 
-    for (const skill in skills) {
-      await Skill.updateOne({'id': skill}, {
-        $push: { concepts: id }
-      })
-    };
+    await Promise.all(
+      skills.map(skill => 
+        Skill.updateOne({ id: skill }, { $push: { concepts: id } })
+      )
+    );
 
-    for (const concept in concepts) {
-      await Concept.updateOne({'id': concept}, {
-        $push: { courses: id }
-      })
-    };
+    await Promise.all(
+      concepts.map(concept => 
+        Concept.updateOne({ id: concept }, { $push: { courses: id } })
+      )
+    );
 
-    for (const prereq in prereqs) {
-      await Course.updateOne({'id': prereq}, {
-        $push: { followups: id }
-      })
-    };
+    await Promise.all(
+      prereqs.map(prereq => 
+        Course.updateOne({ id: prereq }, { $push: { followups: id } })
+      )
+    );
 
-    for (const coreq in coreqs) {
-      await Course.updateOne({'id': coreq}, {
-        $push: { coreqs: id }
-      })
-    };
+    await Promise.all(
+      coreqs.map(coreq => 
+        Course.updateOne({ id: coreq }, { $push: { coreqs: id } })
+      )
+    );
 
-    for (const followup in followups) {
-      await Course.updateOne({'id': followup}, {
-        $push: { prereqs: id }
-      })
-    };
+    await Promise.all(
+      followups.map(followup => 
+        Course.updateOne({ id: followup }, { $push: { prereqs: id } })
+      )
+    );
     
     res.status(201);
     res.send({"Message": "Success!"});
   } catch (err) {
     console.log(err);
-  }
+  };
 
-  ;
 })
 
 app.put('/courses',  async (req, res) => {
