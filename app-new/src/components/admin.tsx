@@ -42,8 +42,9 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
   conceptData.unshift(({ label: "New Concept",  value: data[2].length, }));
 
   const [type, setType] = useState<'Courses' | 'Concepts' | 'Skills'>('Courses');
-  const [form, setForm] = useState(<form></form>);
-  const [resourceButton, setResourceButton] = useState(<div></div>);
+  const [form, setForm] = useState<React.JSX.Element>(<form></form>);
+  const [resourceButton, setResourceButton] = useState<React.JSX.Element>(<div></div>);
+  const [resourceMenuButton, setResourceMenuButton] = useState<React.JSX.Element>(<div></div>);
   
   const [id, setId] = useState<number>(0);
   
@@ -227,12 +228,20 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
       setCoreqs([]);
       setFollowups([]);
       setResources([]);
+      setResourceOptions([]);
+      setResourceName('');
+      setResourceLink('');
+      setResourceType('video');
+      
+      toggleResourceMenuButton(0);
 
     } else {
 
       setDesc(data[i][event].description);
       setId(data[i][event].id);
       setButtonName("Edit");
+      
+      toggleResourceMenuButton(1);
 
       if (i == 0) {
         setName(data[i][event].course_name);
@@ -270,13 +279,23 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
           value: cntr++ 
         })));
       }
-      
-      setResourceButton(<div></div>);
       setResourceName('');
       setResourceLink('');
       setResourceType('video');
     }
   } 
+
+  const toggleResourceMenuButton = (e: number) => {
+    if (e == 1) {
+      setResourceMenuButton(
+        <button className="btn btn-primary" type="button" onClick={editResources}>Edit Resources</button>
+      )
+    } else {
+      setResourceMenuButton(
+        <button className="btn btn-primary opacity-50 cursor-not-allowed" type="button">Create the {type.toLowerCase().slice(0, -1)} before adding resources!</button>
+      )
+    }
+  }
 
   const updateResourceFields = (event:string) => {
     const resource =  resources.find(obj => obj.name === event);
@@ -364,7 +383,7 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
               <label htmlFor="conceptSelect">Follow up Skills</label>
               <Select styles={customStyles} options={skillData.slice(1)} value={followups} closeMenuOnSelect={false} components={animatedComponents} isMulti menuPlacement="top" onChange={(event) => {setFollowups(event)}}/>
               
-              <button className="btn btn-primary" type="button" onClick={editResources}>Edit Resources</button>
+              {resourceMenuButton}
               <div className={resourceEditToggle + ' w-3/5 h-3/5 absolute z-50 bg-white border-2 border-black p-10'}>
               
                 <Select 
@@ -374,7 +393,7 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
                   onChange={(event) => updateResourceFields((event as {label: string}).label)
                   }
                 />
-
+R
                 <Input name="Resource Name" id="rname" setter={setResourceName} value={resourceName} />
                 <Input name="Resource Link" id="rlink" setter={setResourceLink} value={resourceLink} />
                 <label htmlFor="Resource Type">Resource Type</label>
@@ -413,7 +432,7 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
               <label htmlFor="conceptSelect">Follow up Concepts</label>
               <Select styles={customStyles} options={conceptData.slice(1)} value={followups} closeMenuOnSelect={false} components={animatedComponents} isMulti menuPlacement="top" onChange={(event) => {setFollowups(event)}}/>
 
-              <button className="btn btn-primary" type="button" onClick={editResources}>Edit Resources</button>
+              {resourceMenuButton}
               <div className={resourceEditToggle + ' w-3/5 h-3/5 absolute z-50 bg-white border-2 border-black p-10'}>
               
                 <Select 
@@ -444,7 +463,7 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
         )
         break;
     }
-  }, [type, id, name, deptcode, coursecode, desc, concepts, courses, prereqs, coreqs, skills, followups, resourceEditToggle, resourceLink, resourceName, resourceType, resourceButton, selectedResource])
+  }, [type, id, name, deptcode, coursecode, desc, concepts, courses, prereqs, coreqs, skills, followups, resourceEditToggle, resourceLink, resourceName, resourceType, resourceButton, selectedResource, resourceMenuButton])
 
   return (
     <div>

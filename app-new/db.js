@@ -55,9 +55,7 @@ const skillsSchema = new mongoose.Schema({
 });
 const Skill = mongoose.model('Skill', skillsSchema);
 
-
 mongoose.connect(MONGO);
-
 
 /*
 ============ 
@@ -482,7 +480,7 @@ app.post('/skills', async (req, res) => {
   const id = req.body.id;
   const name = req.body.name;
   const desc = req.body.desc;
-  const concepts = req.body.concepts;
+  const concepts = req.body.concepts; 
   const courses = req.body.courses;
   const links = req.body.links;
   const prereq = req.body.prereq;
