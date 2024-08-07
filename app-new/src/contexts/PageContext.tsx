@@ -59,6 +59,7 @@ export interface Skill {
 }
 
 export interface Link {
+  id: number,
   link: string,
   name: string,
   type: "video" | "article"

@@ -29,22 +29,22 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
   const courseData: SelectOption[] = data[0]
     .map(({ id, course_name } : { id:number, course_name:string }) => ({ label: course_name, value: id }))
     .sort((a, b) => compareFn(a, b));
-  courseData.unshift(({ label: "New Course",  value: data[0].length, }));
+  courseData.unshift(({ label: "New Course",  value: Math.max(...courseData.map(item => item.value)) + 1 }));
 
   const skillData: SelectOption[] = data[1]
     .map(({ id, skill_name } : { id:number, skill_name:string }) => ({ label: skill_name, value: id }))
     .sort((a, b) => compareFn(a, b));
-  skillData.unshift(({ label: "New Skill",  value: data[1].length, }));
+  skillData.unshift(({ label: "New Skill",  value: Math.max(...skillData.map(item => item.value)) + 1 }));
 
   const conceptData: SelectOption[] = data[2]
     .map(({ id, concept_name } : { id:number, concept_name:string }) => ({ label: concept_name, value: id }))
     .sort((a, b) => compareFn(a, b));
-  conceptData.unshift(({ label: "New Concept",  value: data[2].length, }));
+  conceptData.unshift(({ label: "New Concept",  value: Math.max(...conceptData.map(item => item.value)) + 1 }));
 
   const [type, setType] = useState<'Courses' | 'Concepts' | 'Skills'>('Courses');
   const [form, setForm] = useState(<form></form>);
   const [resourceButton, setResourceButton] = useState(<div></div>);
-  
+
   const [id, setId] = useState<number>(0);
   
   const [name, setName] = useState<string>('');
@@ -59,6 +59,7 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
   const [followups, setFollowups] = useState<MultiValue<SelectOption>>([]);
   const [resources, setResources] = useState<Link[]>([]);
   const [resourceOptions, setResourceOptions] = useState<SelectOption[]>([]);
+  const [resourceId, setResourceId] = useState<number>(0);
   const [resourceName, setResourceName] = useState<string>('');
   const [resourceLink, setResourceLink] = useState<string>('');
   const [resourceType, setResourceType] = useState<'video' | 'article'>('video');
@@ -98,7 +99,7 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
         "prereqs": prereqs.map(o => o.value),
         "followups": followups.map(o => o.value),
         "coreqs": coreqs.map(o => o.value),
-        "links": []
+        "links": resources
       }
     } else if (type == "Courses") {
       reqData = {
@@ -123,12 +124,12 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
         "prereqs": prereqs.map(o => o.value),
         "followups": followups.map(o => o.value),
         "coreqs": coreqs.map(o => o.value),
-        "links": []
+        "links": resources
       }
     }
     console.log(reqData);
     if (buttonName == "Create") {
-      fetch('http://67.242.77.142:8000/db/' + type.toLowerCase(), {
+      fetch('http://localhost:3000/db/' + type.toLowerCase(), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -150,7 +151,7 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
       })
     } else {
       
-      fetch('http://67.242.77.142:8000/db/' + type.toLowerCase() + '/' + id, {
+      fetch('http://localhost:3000/db/' + type.toLowerCase() + '/' + id, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -286,11 +287,13 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
       setResourceName(resource.name);
       setResourceLink(resource.link);
       setResourceType(resource.type);
+      setResourceId(resource.id);
       setResourceButtonId(2);
     } else {
       setResourceName("Enter a name");
       setResourceLink("Enter a Link");
       setResourceType('video');
+      setResourceId(Math.max(...resources.map(link => link.id)) + 1);
       setResourceButtonId(1);
     }
   }
@@ -299,18 +302,97 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
     if (resourceButtonId == 1) {
       setResourceButton(
         <div>
-          <button className="btn btn-primary" type="submit">Create</button>  
+          <button className="btn btn-primary" onClick={() => handleResourceButton('create')}>Create</button>  
         </div>
       )
     } else if (resourceButtonId == 2) {
       setResourceButton( 
         <div>
-          <button className="btn btn-primary" type="submit">Edit</button>  
-          <button className="btn btn-primary" type="submit">Delete</button>  
+          <button className="btn btn-primary" onClick={() => handleResourceButton('edit')}>Edit</button>  
+          <button className="btn btn-primary" onClick={() => handleResourceButton('delete')}>Delete</button>  
         </div>
       )
     }
   }, [resourceButtonId]);
+
+  const handleResourceButton = (reqType: 'create' | 'edit' | 'delete') => {
+    if (reqType == 'create') {
+      fetch('http://localhost:3000/db/resources/' + type.toLowerCase() + '/' + id, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          'id': resourceId,
+          'name': resourceName,
+          'type': resourceType,
+          'link': resourceLink
+        })
+      })
+      .then(resp => {
+        if (!resp.ok) {
+          throw new Error("Creation Failed. " + resp.statusText);
+        }
+        alert("Success!");
+        console.log("Success!");
+        window.location.href = "/admin";
+      })
+      .catch(err => {
+        alert('ERROR!: ' + err)
+        console.log(err);
+      })
+    } else if (reqType == 'edit') {
+      fetch('http://localhost:3000/db/resources/' + type.toLowerCase() + '/' + id, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          'id': resourceId,
+          'name': resourceName,
+          'type': resourceType,
+          'link': resourceLink
+        })
+      })
+      .then(resp => {
+        if (!resp.ok) {
+          throw new Error("Update Failed. " + resp.statusText);
+        }
+        alert("Success!");
+        console.log("Success!");
+        window.location.href = "/admin";
+      })
+      .catch(err => {
+        alert('ERROR!: ' + err)
+        console.log(err);
+      })
+    } else if (reqType == 'delete') {
+      fetch('http://localhost:3000/db/resources/' + type.toLowerCase() + '/' + id, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          'id': resourceId,
+          'name': resourceName,
+          'type': resourceType,
+          'link': resourceLink
+        })
+      })
+      .then(resp => {
+        if (!resp.ok) {
+          throw new Error("Deletion Failed. " + resp.statusText);
+        }
+        alert("Success!");
+        console.log("Success!");
+        window.location.href = "/admin";
+      })
+      .catch(err => {
+        alert('ERROR!: ' + err)
+        console.log(err);
+      })
+    }
+  }
 
   useEffect(() => {
     switch (type) {
