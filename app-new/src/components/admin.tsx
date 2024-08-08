@@ -536,7 +536,7 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
           
             <form className="flex flex-col m-1" onSubmit={handleSubmit}>
               
-              <Input name="Course Name" id="name" setter={setName} value={name} />
+              <Input name="Concept Name" id="name" setter={setName} value={name} />
               <Input name="Description" id="desc" setter={setDesc} value={desc} />  
 
               <label htmlFor="conceptSelect">Connected Skills</label>
