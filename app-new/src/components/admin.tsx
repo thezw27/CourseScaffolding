@@ -89,50 +89,64 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
     }
   ]
 
-  const handleSubmit = (e: string) => {
-    
-    let reqData
-    if (type == 'Concepts') {
+  const handleSubmit = (event : React.FormEvent<HTMLFormElement>) => {
+
+    event.preventDefault();
+    const reqType: string = ((event.nativeEvent as SubmitEvent).submitter!.id);
+    let reqData;
+
+    if (reqType.startsWith('r')) {
       reqData = {
-        "id": id,
-        "name": name,
-        "desc": desc,
-        "skills": skills.map(o => o.value),
-        "courses": courses.map(o => o.value),
-        "prereqs": prereqs.map(o => o.value),
-        "followups": followups.map(o => o.value),
-        "coreqs": coreqs.map(o => o.value),
-        "links": resources
-      }
-    } else if (type == "Courses") {
-      reqData = {
-        "id": id,
-        "name": name,
-        "depcode": deptcode,
-        "coursecode": coursecode,
-        "desc": desc,
-        "skills": skills.map(o => o.value),
-        "concepts": concepts.map(o => o.value),
-        "prereqs": prereqs.map(o => o.value),
-        "followups": followups.map(o => o.value),
-        "coreqs": coreqs.map(o => o.value)
+        'id': resourceId,
+        'name': resourceName,
+        'type': resourceType,
+        'link': resourceLink
       }
     } else {
-      reqData = {
-        "id": id,
-        "name": name,
-        "desc": desc,
-        "concepts": concepts.map(o => o.value),
-        "courses": courses.map(o => o.value),
-        "prereqs": prereqs.map(o => o.value),
-        "followups": followups.map(o => o.value),
-        "coreqs": coreqs.map(o => o.value),
-        "links": resources
+
+      if (type == 'Concepts') {
+        reqData = {
+          "id": id,
+          "name": name,
+          "desc": desc,
+          "skills": skills.map(o => o.value),
+          "courses": courses.map(o => o.value),
+          "prereqs": prereqs.map(o => o.value),
+          "followups": followups.map(o => o.value),
+          "coreqs": coreqs.map(o => o.value),
+          "links": resources
+        }
+      } else if (type == "Courses") {
+        reqData = {
+          "id": id,
+          "name": name,
+          "depcode": deptcode,
+          "coursecode": coursecode,
+          "desc": desc,
+          "skills": skills.map(o => o.value),
+          "concepts": concepts.map(o => o.value),
+          "prereqs": prereqs.map(o => o.value),
+          "followups": followups.map(o => o.value),
+          "coreqs": coreqs.map(o => o.value)
+        }
+      } else {
+        reqData = {
+          "id": id,
+          "name": name,
+          "desc": desc,
+          "concepts": concepts.map(o => o.value),
+          "courses": courses.map(o => o.value),
+          "prereqs": prereqs.map(o => o.value),
+          "followups": followups.map(o => o.value),
+          "coreqs": coreqs.map(o => o.value),
+          "links": resources
+        }
       }
+
     }
 
-    if (e == "create") {
-      fetch('http://localhost:3000/db/' + type.toLowerCase(), {
+    if (reqType == "create") {
+      fetch('http://67.242.77.142:8000/db/' + type.toLowerCase(), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -144,7 +158,7 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
           throw new Error("Creation Failed. " + resp.statusText);
         }
         
-        alert("Success!");
+        alert("Created Successfully!");
         console.log("Success!");
         window.location.href = "/admin";
       })
@@ -152,9 +166,9 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
         alert('ERROR!: ' + err)
         console.log(err);
       })
-    } else if (e == "edit") {
+    } else if (reqType == "edit") {
       console.log(reqData);      
-      fetch('http://localhost:3000/db/' + type.toLowerCase() + '/' + id, {
+      fetch('http://67.242.77.142:8000/db/' + type.toLowerCase() + '/' + id, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -165,17 +179,17 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
         if (!resp.ok) {
           throw new Error("Update Failed. " + resp.statusText);
         }
-        alert("Success!");
+        alert("Edited Successfully!");
         console.log("Success!");
-        window.location.href = "/admin";
+        //window.location.href = "/admin";
       })
       .catch(err => {
         console.log(err);
         alert("Error! " + err);
       })
-    } else if (e == "delete") {
+    } else if (reqType == "delete") {
       console.log(id);
-      fetch('http://localhost:3000/db/' + type.toLowerCase() + '/' + id, {
+      fetch('http://67.242.77.142:8000/db/' + type.toLowerCase() + '/' + id, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -185,7 +199,7 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
         if (!resp.ok) {
           throw new Error("Delete Failed. " + resp.statusText);
         }
-        alert("Success!");
+        alert("Deleted Successfully!");
         console.log("Success!");
         window.location.href = "/admin";
       })
@@ -193,8 +207,68 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
         console.log(err);
         alert("Error! " + err);
       })
+    } else if (reqType == 'rcreate') {
+      fetch('http://67.242.77.142:8000/db/resources/' + type.toLowerCase() + '/' + id, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(reqData)
+      })
+      .then(resp => {
+        if (!resp.ok) {
+          throw new Error("Creation Failed. " + resp.statusText);
+        }
+        alert("Created Successfully!");
+        console.log("Success!");
+        window.location.href = "/admin";
+      })
+      .catch(err => {
+        alert('ERROR!: ' + err)
+        console.log(err);
+      })
+    } else if (reqType == 'redit') {
+      fetch('http://67.242.77.142:8000/db/resources/' + type.toLowerCase() + '/' + id, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(reqData)
+      })
+      .then(resp => {
+        if (!resp.ok) {
+          throw new Error("Update Failed. " + resp.statusText);
+        }
+        alert("Edited Successfully!");
+        console.log("Success!");
+        window.location.href = "/admin";
+      })
+      .catch(err => {
+        alert('ERROR!: ' + err)
+        console.log(err);
+      })
+    } else if (reqType == 'rdelete') {
+      fetch('http://67.242.77.142:8000/db/resources/' + type.toLowerCase() + '/' + id, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(reqData)
+      })
+      .then(resp => {
+        if (!resp.ok) {
+          throw new Error("Deletion Failed. " + resp.statusText);
+        }
+        alert("Deleted Successfully!");
+        console.log("Success!");
+        window.location.href = "/admin";
+      })
+      .catch(err => {
+        alert('ERROR!: ' + err)
+        console.log(err);
+      })
     }
-  };
+  }
 
   const editResources = () => {
     setResourceEditToggle('block');
@@ -348,119 +422,42 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
     if (resourceButtonId == 1) {
       setResourceButton(
         <div>
-          <button className="btn btn-primary" type="button" onClick={() => handleResourceButton('create')}>Create</button>  
+          <button className="btn btn-primary" type="submit" id="rcreate">Create</button>  
         </div>
       )
     } else if (resourceButtonId == 2) {
       setResourceButton( 
         <div>
-          <button className="btn btn-primary" type="button" onClick={() => handleResourceButton('edit')}>Edit</button>  
-          <button className="btn btn-primary" type="button" onClick={() => handleResourceButton('delete')}>Delete</button>  
+          <button className="btn btn-primary" type="submit" id="redit">Edit</button>  
+          <button className="btn btn-danger" type="submit" id="rdelete">Delete</button>  
         </div>
       )
     }
-  }, [resourceButtonId, resourceId]);
-
-  const handleResourceButton = (reqType: 'create' | 'edit' | 'delete') => {
-
-    if (reqType == 'create') {
-      fetch('http://localhost:3000/db/resources/' + type.toLowerCase() + '/' + id, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          'id': resourceId,
-          'name': resourceName,
-          'type': resourceType,
-          'link': resourceLink
-        })
-      })
-      .then(resp => {
-        if (!resp.ok) {
-          throw new Error("Creation Failed. " + resp.statusText);
-        }
-        alert("Success!");
-        console.log("Success!");
-        window.location.href = "/admin";
-      })
-      .catch(err => {
-        alert('ERROR!: ' + err)
-        console.log(err);
-      })
-    } else if (reqType == 'edit') {
-      fetch('http://localhost:3000/db/resources/' + type.toLowerCase() + '/' + id, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          'id': resourceId,
-          'name': resourceName,
-          'type': resourceType,
-          'link': resourceLink
-        })
-      })
-      .then(resp => {
-        if (!resp.ok) {
-          throw new Error("Update Failed. " + resp.statusText);
-        }
-        alert("Success!");
-        console.log("Success!");
-        window.location.href = "/admin";
-      })
-      .catch(err => {
-        alert('ERROR!: ' + err)
-        console.log(err);
-      })
-    } else if (reqType == 'delete') {
-      fetch('http://localhost:3000/db/resources/' + type.toLowerCase() + '/' + id, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          'id': resourceId
-        })
-      })
-      .then(resp => {
-        if (!resp.ok) {
-          throw new Error("Deletion Failed. " + resp.statusText);
-        }
-        alert("Success!");
-        console.log("Success!");
-        window.location.href = "/admin";
-      })
-      .catch(err => {
-        alert('ERROR!: ' + err)
-        console.log(err);
-      })
-    }
-  };
+  }, [resourceButtonId]);
 
   useEffect(() => {
     if (buttonType == "new") {
       setButton(
         <div>
-          <button className="btn btn-primary" type="button" onClick={() => handleSubmit('create')}>Create</button>   
+          <button className="btn btn-primary" id="create" type="submit">Create</button>   
         </div>
       )
     } else {
       setButton(
         <div>
-          <button className="btn btn-primary" type="button" onClick={() => handleSubmit('edit')}>Edit</button>
-          <button className="btn btn-danger" type="button" onClick={() => handleSubmit('delete')}>Delete</button>
+          <button className="btn btn-primary" id="edit" type="submit">Edit</button>
+          <button className="btn btn-danger" id="delete" type="submit">Delete</button>
         </div>
       )
     }
-  }, [buttonType, id]);
+  }, [buttonType]);
 
   useEffect(() => {
     switch (type) {
       case 'Courses':
         setOptions(courseData);
         setForm(
-            <form className="flex flex-col m-1">
+            <form className="flex flex-col m-1" onSubmit={handleSubmit}>
               
               <Input name="Course Name" id="name" setter={setName} value={name} />
               <Input name="Department" id="dept" setter={setDeptcode} value={deptcode} />
@@ -489,7 +486,7 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
       case 'Skills':
         setOptions(skillData);
         setForm(
-            <form className="flex flex-col m-1">
+            <form className="flex flex-col m-1" onSubmit={handleSubmit}>
               
               <Input name="Skill Name" id="name" setter={setName} value={name} />
               <Input name="Description" id="desc" setter={setDesc} value={desc} /> 
@@ -537,7 +534,7 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
         setOptions(conceptData);
         setForm(
           
-            <form className="flex flex-col m-1">
+            <form className="flex flex-col m-1" onSubmit={handleSubmit}>
               
               <Input name="Course Name" id="name" setter={setName} value={name} />
               <Input name="Description" id="desc" setter={setDesc} value={desc} />  
