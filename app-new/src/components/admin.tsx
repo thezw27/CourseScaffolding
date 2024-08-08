@@ -66,6 +66,7 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
   const [resourceType, setResourceType] = useState<'video' | 'article'>('video');
   const [options, setOptions] = useState<SelectOption[]>([]);
   const [resourceEditToggle, setResourceEditToggle] = useState<'hidden' | 'block'>('hidden');
+
   //0 is none, 1 is create, 2 is edit/delete
   const [resourceButtonId, setResourceButtonId] = useState<number>(0);
   const [selectedResource, setSelectedResource] = useState<SingleValue<SelectOption>>();
@@ -131,7 +132,7 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
     }
 
     if (e == "create") {
-      fetch('http://67.242.77.142:8000/db/' + type.toLowerCase(), {
+      fetch('http://localhost:3000/db/' + type.toLowerCase(), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -152,8 +153,8 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
         console.log(err);
       })
     } else if (e == "edit") {
-      
-      fetch('http://67.242.77.142:8000/db/' + type.toLowerCase() + '/' + id, {
+      console.log(reqData);      
+      fetch('http://localhost:3000/db/' + type.toLowerCase() + '/' + id, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -174,7 +175,7 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
       })
     } else if (e == "delete") {
       console.log(id);
-      fetch('http://67.242.77.142:8000/db/' + type.toLowerCase() + '/' + id, {
+      fetch('http://localhost:3000/db/' + type.toLowerCase() + '/' + id, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -198,10 +199,12 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
   const editResources = () => {
     setResourceEditToggle('block');
   };
+
   const closeResources = () => {
     setResourceEditToggle('hidden');
     setSelectedResource(undefined);
   };
+
   const updateFields = (event: number, setType = 'none') => {
     let i = 0;
     if (setType == 'none') {
@@ -234,7 +237,7 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
           i = -1;
           break;
       }
-    }
+    };
 
     //If event == new course
     if (event == Math.max(...data[i].map(item => item.id)) + 1 || event == 0) {
@@ -263,7 +266,7 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
 
       console.log(event);
       console.log(data[i]);
-      console.log(data[i].find(obj => obj.id == event)!);
+      console.log("Descrition", data[i].find(obj => obj.id === event)!.description);
       setDesc(data[i].find(obj => obj.id === event)!.description);
       setId(data[i].find(obj => obj.id === event)!.id);
       setButtonType("exists");
@@ -356,12 +359,12 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
         </div>
       )
     }
-  }, [resourceButtonId]);
+  }, [resourceButtonId, resourceId]);
 
   const handleResourceButton = (reqType: 'create' | 'edit' | 'delete') => {
 
     if (reqType == 'create') {
-      fetch('http://67.242.77.142:8000/db/resources/' + type.toLowerCase() + '/' + id, {
+      fetch('http://localhost:3000/db/resources/' + type.toLowerCase() + '/' + id, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -386,7 +389,7 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
         console.log(err);
       })
     } else if (reqType == 'edit') {
-      fetch('http://67.242.77.142:8000/db/resources/' + type.toLowerCase() + '/' + id, {
+      fetch('http://localhost:3000/db/resources/' + type.toLowerCase() + '/' + id, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -411,7 +414,7 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
         console.log(err);
       })
     } else if (reqType == 'delete') {
-      fetch('http://67.242.77.142:8000/db/resources/' + type.toLowerCase() + '/' + id, {
+      fetch('http://localhost:3000/db/resources/' + type.toLowerCase() + '/' + id, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -450,7 +453,7 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
         </div>
       )
     }
-  }, [buttonType]);
+  }, [buttonType, id]);
 
   useEffect(() => {
     switch (type) {

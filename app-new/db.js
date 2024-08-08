@@ -495,7 +495,7 @@ app.put('/courses/:id',  async (req, res) => {
   const coreqs = req.body.coreqs;
   const followups = req.body.followups;
   const skills = req.body.skills;
-  const concepts = req.body.courses;
+  const concepts = req.body.concepts;
 
   try {
 
@@ -505,6 +505,8 @@ app.put('/courses/:id',  async (req, res) => {
       return res.status(404).send({ "Message": "Course not found" });
     }
 
+    console.log("bruh", desc);
+    console.log(req.body);
     await Course.updateOne({"id": id}, {
       "department_code": depcode,
       "course_code": coursecode,
@@ -523,11 +525,11 @@ app.put('/courses/:id',  async (req, res) => {
     const addedConcepts = concepts.filter(concept => !originalCourse.concepts.includes(concept));
     const removedConcepts = originalCourse.concepts.filter(concept => !concepts.includes(concept));
 
-    const addedPrereqs = prereq.filter(prereq => !originalCourse.prereqs.includes(prereq));
-    const removedPrereqs = originalCourse.prereqs.filter(prereq => !prereq.includes(prereq));
+    const addedPrereqs = prereqs.filter(prereq => !originalCourse.prereqs.includes(prereq));
+    const removedPrereqs = originalCourse.prereqs.filter(prereq => !prereqs.includes(prereq));
 
-    const addedCoreqs = coreq.filter(coreq => !originalCourse.coreqs.includes(coreq));
-    const removedCoreqs = originalCourse.coreqs.filter(coreq => !coreq.includes(coreq));
+    const addedCoreqs = coreqs.filter(coreq => !originalCourse.coreqs.includes(coreq));
+    const removedCoreqs = originalCourse.coreqs.filter(coreq => !coreqs.includes(coreq));
 
     const addedFollowups = followups.filter(followup => !originalCourse.followups.includes(followup));
     const removedFollowups = originalCourse.followups.filter(followup => !followups.includes(followup));
@@ -554,7 +556,7 @@ app.put('/courses/:id',  async (req, res) => {
     res.send({"Message": "Successfully updated!"});
     
   } catch (err) {
-    //console.log(err);
+    console.log(err);
     res.status(500);
     res.send({"Message": "Error: " + err})
   };
