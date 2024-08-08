@@ -181,7 +181,7 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
         }
         alert("Edited Successfully!");
         console.log("Success!");
-        //window.location.href = "/admin";
+        window.location.href = "/admin";
       })
       .catch(err => {
         console.log(err);
