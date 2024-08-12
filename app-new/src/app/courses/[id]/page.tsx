@@ -2,8 +2,10 @@ import React from 'react';
 import Header from "../../../components/header";
 import { Params, Course, Concept, Skill } from "@/contexts/PageContext";
 
+const DB = process.env.DB;
+
 export default async function Page({ params }: { params: Params}) {
-  const resp = await fetch("http://67.242.77.142:8000/db/courses/" + params.id, { cache: "no-cache" });
+  const resp = await fetch(DB + "/courses/" + params.id, { cache: "no-cache" });
   const data: Course = await resp.json();
   
 
@@ -36,7 +38,7 @@ const populateCourses = async (data: Course) => {
 
   for (let i = 0; i < data.prereqs.length; i++) {
     try {
-      const resp = await fetch("http://67.242.77.142:8000/db/courses/" + data.prereqs[i]);
+      const resp = await fetch(DB + "/courses/" + data.prereqs[i]);
       const d: Course = await resp.json();
       console.log(0, d);
 
@@ -48,7 +50,7 @@ const populateCourses = async (data: Course) => {
 
   for (let i = 0; i < data.coreqs.length; i++) {
     try {
-      const resp = await fetch("http://67.242.77.142:8000/db/courses/" + data.coreqs[i]);
+      const resp = await fetch(DB + "/courses/" + data.coreqs[i]);
       const d: Course = await resp.json();
 
       coreqList.push(<li className="link" key={d.id}><a href= {'/courses/' + d.id} > { d.course_name } </a></li>);
@@ -59,7 +61,7 @@ const populateCourses = async (data: Course) => {
 
   for (let i = 0; i < data.followups.length; i++) {
     try {
-      const resp = await fetch("http://67.242.77.142:8000/db/courses/" + data.followups[i]);
+      const resp = await fetch(DB + "/courses/" + data.followups[i]);
       const d: Course = await resp.json();
 
       followupList.push(<li className="link" key={d.id}><a href= {'/courses/' + d.id} > { d.course_name } </a></li>);
@@ -91,7 +93,7 @@ const populateRelationships = async (data: Course) => {
 
   for (let i = 0; i < data.skills.length; i++) {
     try {
-      const resp = await fetch("http://67.242.77.142:8000/db/skills/" + data.skills[i]);
+      const resp = await fetch(DB + "/skills/" + data.skills[i]);
       const d: Skill = await resp.json();
       console.log(1, d);
 
@@ -103,7 +105,7 @@ const populateRelationships = async (data: Course) => {
 
   for (let i = 0; i < data.concepts.length; i++) {
     try {
-      const resp = await fetch("http://67.242.77.142:8000/db/concepts/" + data.concepts[i]);
+      const resp = await fetch(DB + "/concepts/" + data.concepts[i]);
       const d: Concept = await resp.json();
 
       conceptsList.push(<li className="link" key={d.id}><a href= {'/concepts/' + d.id} > { d.concept_name } </a></li>);

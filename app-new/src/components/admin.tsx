@@ -8,6 +8,8 @@ import Header from "../components/header";
 //import 'react-select-search/style.css';
 import { Concept, Course, Skill, Link, SelectOption } from '@/contexts/PageContext';
 
+const DB = process.env.NEXT_PUBLIC_DB;
+
 export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
 
   const animatedComponents = makeAnimated();
@@ -18,27 +20,19 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
     }),
   };
 
-  const compareFn = (a: { label: string, value: number}, b: { label: string, value: number}) => {
-    if (a.label > b.label) {
-      return 1;
-    } else {
-      return -1;
-    }
-  };
-
   const courseData: SelectOption[] = data[0]
     .map(({ id, course_name } : { id:number, course_name:string }) => ({ label: course_name, value: id }))
-    .sort((a, b) => compareFn(a, b));
+    .sort((a, b) => a.label.localeCompare(b.label));
   courseData.unshift(({ label: "New Course",  value: courseData.length > 0 ? Math.max(...courseData.map(item => item.value)) + 1 : 0 }));
 
   const skillData: SelectOption[] = data[1]
     .map(({ id, skill_name } : { id:number, skill_name:string }) => ({ label: skill_name, value: id }))
-    .sort((a, b) => compareFn(a, b));
+    .sort((a, b) => a.label.localeCompare(b.label));
   skillData.unshift(({ label: "New Skill",  value: skillData.length > 0 ? Math.max(...skillData.map(item => item.value)) + 1 : 0 }));
 
   const conceptData: SelectOption[] = data[2]
     .map(({ id, concept_name } : { id:number, concept_name:string }) => ({ label: concept_name, value: id }))
-    .sort((a, b) => compareFn(a, b));
+    .sort((a, b) => a.label.localeCompare(b.label));
   conceptData.unshift(({ label: "New Concept",  value: conceptData.length > 0 ? Math.max(...conceptData.map(item => item.value)) + 1 : 0 }));
 
   const [type, setType] = useState<'Courses' | 'Concepts' | 'Skills'>('Courses');
@@ -73,6 +67,8 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
   
   const [buttonType, setButtonType] = useState<'exists' | 'new'>('new');
   const [button, setButton] = useState<React.JSX.Element>();
+
+  const [objVal, setObjVal] = useState<SingleValue<SelectOption>>(courseData[0]);
 
   const menuOptions = [
     {
@@ -146,7 +142,7 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
     }
 
     if (reqType == "create") {
-      fetch('http://67.242.77.142:8000/db/' + type.toLowerCase(), {
+      fetch(DB + '/' + type.toLowerCase(), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -167,8 +163,7 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
         console.log(err);
       })
     } else if (reqType == "edit") {
-      console.log(reqData);      
-      fetch('http://67.242.77.142:8000/db/' + type.toLowerCase() + '/' + id, {
+      fetch(DB + '/' + type.toLowerCase() + '/' + id, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -189,7 +184,7 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
       })
     } else if (reqType == "delete") {
       console.log(id);
-      fetch('http://67.242.77.142:8000/db/' + type.toLowerCase() + '/' + id, {
+      fetch(DB + '/' + type.toLowerCase() + '/' + id, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -208,7 +203,7 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
         alert("Error! " + err);
       })
     } else if (reqType == 'rcreate') {
-      fetch('http://67.242.77.142:8000/db/resources/' + type.toLowerCase() + '/' + id, {
+      fetch(DB + '/resources/' + type.toLowerCase() + '/' + id, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -228,7 +223,7 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
         console.log(err);
       })
     } else if (reqType == 'redit') {
-      fetch('http://67.242.77.142:8000/db/resources/' + type.toLowerCase() + '/' + id, {
+      fetch(DB + '/resources/' + type.toLowerCase() + '/' + id, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -248,7 +243,7 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
         console.log(err);
       })
     } else if (reqType == 'rdelete') {
-      fetch('http://67.242.77.142:8000/db/resources/' + type.toLowerCase() + '/' + id, {
+      fetch(DB + '/resources/' + type.toLowerCase() + '/' + id, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -338,9 +333,6 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
 
     } else {
 
-      console.log(event);
-      console.log(data[i]);
-      console.log("Descrition", data[i].find(obj => obj.id === event)!.description);
       setDesc(data[i].find(obj => obj.id === event)!.description);
       setId(data[i].find(obj => obj.id === event)!.id);
       setButtonType("exists");
@@ -477,7 +469,7 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
               <Select styles={customStyles} options={courseData.slice(1)} value={coreqs} closeMenuOnSelect={false} components={animatedComponents} isMulti menuPlacement="top" onChange={(event) => {setCoreqs(event)}}/>
               
               <label htmlFor="conceptSelect">Follow up Courses</label>
-              <Select styles={customStyles} options={courseData.slice(1)} value={followups} closeMenuOnSelect={false} components={animatedComponents} isMulti menuPlacement="top" onChange={(event) => {console.log(event); setFollowups(event)}}/>
+              <Select styles={customStyles} options={courseData.slice(1)} value={followups} closeMenuOnSelect={false} components={animatedComponents} isMulti menuPlacement="top" onChange={(event) => {setFollowups(event)}}/>
               
               {button}
             </form>
@@ -587,6 +579,10 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
     }
   }, [type, id, name, deptcode, coursecode, desc, concepts, courses, prereqs, coreqs, skills, followups, resourceEditToggle, resourceLink, resourceName, resourceType, resourceButton, selectedResource, resourceMenuButton, button, resourceId])
 
+  useEffect(() => {
+    setObjVal(options[0]);
+  }, [type]);
+
   return (
     <div>
       <Header />
@@ -605,8 +601,9 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
         <label htmlFor="objSelect">{type}</label>
         <Select
           id="objSelect" 
-          options={options} 
-          onChange={(event) => { updateFields((event as { value: number}).value) }}
+          options={options}
+          value={objVal} 
+          onChange={(event) => { updateFields((event as { value: number}).value); setObjVal(event); }}
           />
         {form}
       </div>

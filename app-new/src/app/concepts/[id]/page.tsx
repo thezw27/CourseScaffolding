@@ -2,13 +2,16 @@ import React from 'react';
 import Header from "../../../components/header";
 import { Params, Course, Concept, Skill } from "@/contexts/PageContext";
 
+const DB = process.env.DB;
+
 export default async function Page({ params }: { params: Params}) {
-  const resp = await fetch("http://67.242.77.142:8000/db/concepts/" + params.id, { cache: "no-cache" });
+  const resp = await fetch(DB + "/concepts/" + params.id, { cache: "no-cache" });
   const data: Concept = await resp.json();
   
 
   const conceptRelationList = populateConcepts(data);
   const relationships = populateRelationships(data);
+  const links = populateLinks(data);
 
   return (
     <main>
@@ -22,7 +25,8 @@ export default async function Page({ params }: { params: Params}) {
           {conceptRelationList}
           {relationships}
         </div>
-        </div>
+        {links}
+      </div>
     </main>
   )
 }
@@ -35,7 +39,7 @@ const populateConcepts = async (data: Concept) => {
 
   for (let i = 0; i < data.prereqs.length; i++) {
     try {
-      const resp = await fetch("http://67.242.77.142:8000/db/concepts/" + data.prereqs[i]);
+      const resp = await fetch(DB + "/concepts/" + data.prereqs[i]);
       const d: Concept = await resp.json();
 
       prereqList.push(<li className="link" key={d.id}><a href= {'/concepts/' + d.id} > { d.concept_name } </a></li>);
@@ -46,7 +50,7 @@ const populateConcepts = async (data: Concept) => {
 
   for (let i = 0; i < data.coreqs.length; i++) {
     try {
-      const resp = await fetch("http://67.242.77.142:8000/db/concepts/" + data.coreqs[i]);
+      const resp = await fetch(DB + "/concepts/" + data.coreqs[i]);
       const d: Concept = await resp.json();
 
       coreqList.push(<li className="link" key={d.id}><a href= {'/concepts/' + d.id} > { d.concept_name } </a></li>);
@@ -57,7 +61,7 @@ const populateConcepts = async (data: Concept) => {
 
   for (let i = 0; i < data.followups.length; i++) {
     try {
-      const resp = await fetch("http://67.242.77.142:8000/db/concepts/" + data.followups[i]);
+      const resp = await fetch(DB + "/concepts/" + data.followups[i]);
       const d: Concept = await resp.json();
 
       followupList.push(<li className="link" key={d.id}><a href= {'/concepts/' + d.id} > { d.concept_name } </a></li>);
@@ -89,7 +93,7 @@ const populateRelationships = async (data: Concept) => {
 
   for (let i = 0; i < data.courses.length; i++) {
     try {
-      const resp = await fetch("http://67.242.77.142:8000/db/courses/" + data.courses[i]);
+      const resp = await fetch(DB + "/courses/" + data.courses[i]);
       const d: Course = await resp.json();
       coursesList.push(<li className="link" key={d.id}><a href= {'/courses/' + d.id} > { d.course_name } </a></li>);
     } catch (err) {
@@ -99,7 +103,7 @@ const populateRelationships = async (data: Concept) => {
 
   for (let i = 0; i < data.skills.length; i++) {
     try {
-      const resp = await fetch("http://67.242.77.142:8000/db/skills/" + data.skills[i]);
+      const resp = await fetch(DB + "/skills/" + data.skills[i]);
       const d: Skill = await resp.json();
       skillsList.push(<li className="link" key={d.id}><a href= {'/skills/' + d.id} > { d.skill_name } </a></li>);
     } catch (err) {
@@ -118,4 +122,17 @@ const populateRelationships = async (data: Concept) => {
 
     </div>
   );
+}
+
+const populateLinks = async (data: Concept) => {
+  let linkList = [];
+  for (let i = 0; i < data.links.length; i++) {
+    linkList.push(<li className="link"><a href={data.links[i].link}>{data.links[i].name}</a></li> )
+  }
+  return (
+    <div className="flex flex-col items-center">
+      <h3>Resources</h3>
+      <ul className="mb-4 flex flex-col items-center">{linkList}</ul>
+    </div>
+  )
 }

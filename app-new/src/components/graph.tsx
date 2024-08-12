@@ -57,6 +57,7 @@ const Graph = ({data}:{data:[Course[], Skill[], Concept[]]}) => {
   useEffect(() => {
 
     const [tempNodes, tempEdges] = setGraphCourses(graphType, data);
+    console.log("1", tempNodes, tempEdges);
     getLayoutedElements(tempNodes, tempEdges)
     .then((resp) => {
       // @ts-ignore
@@ -257,7 +258,7 @@ const setGraphCourses = (graphType: string, data:[Course[], Skill[], Concept[]])
       const node: Node[] = data[1].map(
         ({ id, skill_name, courses }: Skill) => (
           {
-            id: id.toString(), // Convert id to string
+            id: id.toString(), 
             data: {
               label: skill_name,
               courses: courses.map(courseId => {
@@ -271,7 +272,7 @@ const setGraphCourses = (graphType: string, data:[Course[], Skill[], Concept[]])
           }
         )
       );
-    console.log(node);
+    console.log("SKILL", node);
     let links: Edge[] = [];
     let i = 0;
     
@@ -283,6 +284,7 @@ const setGraphCourses = (graphType: string, data:[Course[], Skill[], Concept[]])
           'target': course.id.toString(),
           'id': i.toString()
         }
+        console.log(link);
         links.push(link);
         i++;
       }

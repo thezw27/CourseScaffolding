@@ -4,6 +4,7 @@ import Header from "../components/header";
 import React from 'react';
 import { Concept, Course, Skill } from '@/contexts/PageContext';
 
+const DB = process.env.DB;
 
 export default async function Home() {
 
@@ -22,9 +23,9 @@ export default async function Home() {
 
 const fetchData = async (): Promise<[Course[], Skill[], Concept[]]> => {
   try {
-    const cresp = await fetch('http://67.242.77.142:8000/db/courses', {cache: "no-cache"});
-    const sresp = await fetch('http://67.242.77.142:8000/db/skills', {cache: "no-cache"});
-    const coresp = await fetch('http://67.242.77.142:8000/db/concepts', {cache: "no-cache"});
+    const cresp = await fetch(DB + '/courses', {cache: "no-cache"});
+    const sresp = await fetch(DB + '/skills', {cache: "no-cache"});
+    const coresp = await fetch(DB + '/concepts', {cache: "no-cache"});
 
     const cdata = await cresp.json();
     const sdata = await sresp.json();
