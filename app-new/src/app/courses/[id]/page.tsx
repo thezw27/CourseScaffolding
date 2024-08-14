@@ -76,7 +76,7 @@ const populateCourses = async (data: Course) => {
       <h3>Prerequisites</h3>
       <ul className="mb-4">{prereqList}</ul>
 
-      <h3>Corequisities</h3>
+      <h3>Related Courses</h3>
       <ul className="mb-4">{coreqList}</ul>
 
       <h3>Follow Up Courses</h3>

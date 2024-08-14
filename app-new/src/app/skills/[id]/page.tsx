@@ -76,7 +76,7 @@ const populateSkills = async (data: Skill) => {
       <h3>Prerequisites</h3>
       <ul className="mb-4">{prereqList}</ul>
 
-      <h3>Corequisities</h3>
+      <h3>Related Skills</h3>
       <ul className="mb-4">{coreqList}</ul>
 
       <h3>Follow Up skills</h3>
