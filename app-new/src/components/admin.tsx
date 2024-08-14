@@ -592,6 +592,10 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
     }
   }, [type, form]);
 
+  useEffect(() => {
+    setObjVal(options[0]);
+  }, [type]);
+
   return (
     <div>
       <Header />
