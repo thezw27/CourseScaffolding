@@ -70,6 +70,9 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
 
   const [objVal, setObjVal] = useState<SingleValue<SelectOption>>(courseData[0]);
 
+  //true to start, then false permenantly
+  const [init, setInit] = useState<boolean>(true);
+
   const menuOptions = [
     {
       label: "Courses",
@@ -580,11 +583,11 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
   }, [type, id, name, deptcode, coursecode, desc, concepts, courses, prereqs, coreqs, skills, followups, resourceEditToggle, resourceLink, resourceName, resourceType, resourceButton, selectedResource, resourceMenuButton, button, resourceId])
 
   useEffect(() => {
-    if (options) {
+    if (options && init) {
       setObjVal(options[0]);
-      console.log(options[0]);
       if (options[0]) {
         updateFields(options[0].value);
+        setInit(false);
       }
     }
   }, [type, form]);
