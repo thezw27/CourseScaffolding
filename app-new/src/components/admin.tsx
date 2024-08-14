@@ -580,8 +580,14 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
   }, [type, id, name, deptcode, coursecode, desc, concepts, courses, prereqs, coreqs, skills, followups, resourceEditToggle, resourceLink, resourceName, resourceType, resourceButton, selectedResource, resourceMenuButton, button, resourceId])
 
   useEffect(() => {
-    setObjVal(options[0]);
-  }, [type]);
+    if (options) {
+      setObjVal(options[0]);
+      console.log(options[0]);
+      if (options[0]) {
+        updateFields(options[0].value);
+      }
+    }
+  }, [type, form]);
 
   return (
     <div>
