@@ -309,9 +309,9 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
     };
 
     //If event == new course
-    if (event == Math.max(...data[i].map(item => item.id)) + 1 || event == 0) {
+    if (event == Math.max(...data[i].map(item => item.id)) + 1 || data[i].length == 0) {
 
-      setId(Math.max(...data[i].map(item => item.id)) + 1);
+      setId(data[i].length > 0 ? Math.max(...data[i].map(item => item.id)) + 1 : 0);
       setName("Add a name");
       setDesc("Add a description");
       setDeptcode("What department is this course in?");
@@ -338,7 +338,7 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
       setButtonType("exists");
       
       toggleResourceMenuButton(1);
-
+      
       if (i == 0) {
         setName(data[i].find(obj => obj.id === event)!.course_name);
         setDeptcode(data[i].find(obj => obj.id === event)!.department_code);

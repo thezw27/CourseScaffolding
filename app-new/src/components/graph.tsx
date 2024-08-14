@@ -10,7 +10,10 @@ import ReactFlow, {
   Edge,
   useNodesState,
   useEdgesState,
-  Viewport
+  Viewport,
+  ReactFlowProvider,
+  ReactFlowInstance,
+  useReactFlow
 } from "reactflow";
 import "reactflow/dist/style.css";
 import ContextMenu from './contextmenu';
@@ -18,11 +21,14 @@ import dagre from "dagre";
 
 import ELK from 'elkjs/lib/elk.bundled.js';
 
-const Graph = ({data}:{data:[Course[], Skill[], Concept[]]}) => {
+const GraphComponent = ({data}:{data:[Course[], Skill[], Concept[]]}) => {
 
   const [nodeElement, setNodeElement] = useState<Element | null>();
 
   const graphRef = useRef<HTMLDivElement | null>(null);
+
+  const { fitView } = useReactFlow();
+  const shouldFitView = useRef(true);
 
   const width = '90vw';
   const height = '80vh';
@@ -57,7 +63,6 @@ const Graph = ({data}:{data:[Course[], Skill[], Concept[]]}) => {
   useEffect(() => {
 
     const [tempNodes, tempEdges] = setGraphCourses(graphType, data);
-    console.log("1", tempNodes, tempEdges);
     getLayoutedElements(tempNodes, tempEdges)
     .then((resp) => {
       // @ts-ignore
@@ -66,9 +71,17 @@ const Graph = ({data}:{data:[Course[], Skill[], Concept[]]}) => {
         setNodes(resp.nodes); 
         // @ts-ignore
         setEdges(resp.edges);
+        shouldFitView.current = true; 
       }
     });
-  }, [data, graphType])
+  }, [data, graphType]);
+
+  useEffect(() => {
+    if (shouldFitView.current) {
+      fitView();
+      shouldFitView.current = false;
+    }
+  }, [nodes, edges, fitView]);
 
   const getLayoutedElements = (nodes: Node[], edges: Edge[]) => {
 
@@ -139,7 +152,6 @@ const Graph = ({data}:{data:[Course[], Skill[], Concept[]]}) => {
           setNodeElement((hoverEvent.target as Element).closest('.react-flow__node'));
           const tempNodeElement = (hoverEvent.target as Element).closest('.react-flow__node')?.getBoundingClientRect();
 
-          console.log(nodeElement)
           if (tempNodeElement) {
             setMenu({
               label: hoveredNode.data.label,
@@ -185,36 +197,55 @@ const Graph = ({data}:{data:[Course[], Skill[], Concept[]]}) => {
         type: menu.type
       })
     }
+  }, [menu]);
+
+  const handleMenuDrag = useCallback((event: React.MouseEvent<Element, MouseEvent>, node: Node) => {
+    if (menu.label == node.data.label && nodeElement) {
+      const rect = nodeElement.getBoundingClientRect();
+      setMenu({
+        label: menu.label,
+        top: rect.top + rect.height,
+        left: rect.left + rect.width/2 - 100,
+        courseData: menu.courseData,
+        type: menu.type
+      })
+    }
   }, [menu])
 
   return (
     <div className="flex m-10" style={{ width: width, height: height}}>
-      {/*<ReactFlowProvider>*/}
-        <ReactFlow
-          ref={graphRef}
-          nodes={nodes}
-          edges={edges}
-          onNodesChange={onNodesChange}
-          onEdgesChange={onEdgesChange}
-          connectionLineType={ConnectionLineType.SmoothStep}
-          onNodeClick={handleClick}
-          onNodeMouseEnter={(event, node) => {setNodeHovered(true); setHoveredNode(node); setHoverEvent(event)}}
-          onNodeMouseLeave={(event, node) => {setNodeHovered(false); setHoveredNode(node); setHoverEvent(event)}}
-          onMove={scrollHandler}
-          proOptions={{hideAttribution: true}}
-          fitView
-          minZoom={0.001}
-        >
-        <Background />
-        <Controls />
-        <MiniMap />
-        </ReactFlow>
-        <ContextMenu {...menu} onHover={setContextMenuHovered} graphType={graphType}/>
-
-      {/*</ReactFlowProvider>*/}
+      <ReactFlow
+        ref={graphRef}
+        nodes={nodes}
+        edges={edges}
+        onNodesChange={onNodesChange}
+        onEdgesChange={onEdgesChange}
+        connectionLineType={ConnectionLineType.SmoothStep}
+        onNodeClick={handleClick}
+        onNodeMouseEnter={(event, node) => {setNodeHovered(true); setHoveredNode(node); setHoverEvent(event)}}
+        onNodeMouseLeave={(event, node) => {setNodeHovered(false); setHoveredNode(node); setHoverEvent(event)}}
+        onMove={scrollHandler}
+        onNodeDrag={(event, node) => handleMenuDrag(event, node)}
+        proOptions={{hideAttribution: true}}
+        fitView
+        minZoom={0.001}
+      >
+      <Background />
+      <Controls />
+      <MiniMap />
+      </ReactFlow>
+      <ContextMenu {...menu} onHover={setContextMenuHovered} graphType={graphType}/>
     </div>
   )
 }
+
+const Graph = ({data}:{data:[Course[], Skill[], Concept[]]}) => {
+  return (
+    <ReactFlowProvider>
+      <GraphComponent data={data} />
+    </ReactFlowProvider>
+  )
+};
 
 export default Graph;
 
@@ -229,8 +260,8 @@ const setGraphCourses = (graphType: string, data:[Course[], Skill[], Concept[]])
             courses: courses.map(courseId => {
               return {
                 id: courseId,
-                name: data[0][courseId].course_name
-              }              
+                name: data[0].find(obj => obj.id === courseId)!.course_name
+              }    
             })
           },
           position: {x:0, y:0}
@@ -264,7 +295,7 @@ const setGraphCourses = (graphType: string, data:[Course[], Skill[], Concept[]])
               courses: courses.map(courseId => {
                 return {
                   id: courseId,
-                  name: data[0][courseId].course_name
+                  name: data[0].find(obj => obj.id === courseId)!.course_name
                 };
               })
             },
@@ -272,7 +303,6 @@ const setGraphCourses = (graphType: string, data:[Course[], Skill[], Concept[]])
           }
         )
       );
-    console.log("SKILL", node);
     let links: Edge[] = [];
     let i = 0;
     
@@ -284,12 +314,10 @@ const setGraphCourses = (graphType: string, data:[Course[], Skill[], Concept[]])
           'target': course.id.toString(),
           'id': i.toString()
         }
-        console.log(link);
         links.push(link);
         i++;
       }
     }
-    console.log(node, links);
     return [node, links]
   } else {
     const node:Node[] = data[0].map(
