@@ -58,6 +58,13 @@ export interface Skill {
   links: Link[]
 }
 
+export interface Group {
+  id: number,
+  group_name: string,
+  description: string,
+  children: number[]
+}
+
 export interface Link {
   id: number,
   link: string,

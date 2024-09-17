@@ -1,5 +1,6 @@
 //All API calls
 
+const { group } = require('console');
 const express = require('express');
 const app = express.Router();
 const mongoose = require('mongoose');
@@ -49,12 +50,21 @@ const skillsSchema = new mongoose.Schema({
   description: String,
   concepts: [Number],
   courses:[Number],
-  links:[linkSchema],
+  links: [linkSchema],
   prereqs: [Number],
   coreqs: [Number],
   followups: [Number],
 });
 const Skill = mongoose.model('Skill', skillsSchema);
+
+
+const groupsSchema = new mongoose.Schema({
+  id: Number,
+  group_name: String,
+  description: String,
+  children: [Number]
+});
+const Group = mongoose.model('Group', groupsSchema);
 
 mongoose.connect(MONGO);
 
@@ -465,17 +475,14 @@ app.get('/courses/:id', async (req, res) => {
 
   const id = req.params.id;
 
-  
-
   try {
     const data = await Course.findOne({"id": id});
     //console.log(data);
     res.send(data);
   } catch (err) {
     //console.log(err);
-  }
-  
-  ;
+  };
+
 })
 
 app.post('/courses/:id', (req, res) => {
@@ -858,7 +865,8 @@ app.delete('/skills/:id', async (req, res) => {
     res.send({"Message": "Deleted Successfully"});
   } catch (err) {
     //console.log(err);
-    res.send({"Message": "ERROR!" + err})
+    res.status(500);
+    res.send({"Message": "ERROR!" + err});
   };
 
 });
@@ -968,11 +976,132 @@ app.delete('/resources/:type/:id/', async (req, res) => {
     resource.links.splice(linkToDelete, 1);
     await resource.save();
 
-    res.status(200).send({ "Message": "Link deleted successfully" });
+    res.status(200);
+    res.send({ "Message": "Link deleted successfully" });
   } catch (err) {
     console.log(err);
-    res.status(500).send({ "Message": "Error: " + err });
+    res.status(500);
+    res.send({ "Message": "Error: " + err });
   }
+});
+
+app.get('/groups', async (req, res) => {
+
+  try {
+
+    const data = await Group.find({});
+    res.status(200);
+    res.send(data);
+
+  } catch (err) {
+    console.log(err);
+    res.status(500);
+    res.send({ "Message": "Error: " + err });
+  }
+
+});
+
+app.post('/groups', async (req, res) => {
+
+  const id = req.body.id;
+  const name = req.body.name;
+  const desc = req.body.desc;
+  const children = req.body.children;
+
+  try {
+    const group = new Group({
+      id: id,
+      group_name: name,
+      desc: desc,
+      children: children
+    })
+    await group.save();
+
+    res.status(201);
+    res.send({"Message": "Success!"});
+  } catch (err) {
+    console.log(err);
+    res.send(500);
+    res.send({ "Message": "Error: " + err });
+  };
+
+});
+
+/*
+app.put('/groups', (req, res) => {
+
+});
+
+app.del('/groups', (req, res) => {
+
+});
+*/
+
+app.get('/groups/:id', async (req, res) => {
+
+  const id = req.params.id;
+
+  try {
+    const data = await Group.findOne({"id": id});
+    res.status(200);
+    res.send(data);
+
+  } catch (err) {
+    console.log(err);
+    res.send(500);
+    res.send({ "Message": "Error: " + err });
+  };
+
+});
+
+app.post('/groups/:id', (req, res) => {
+  res.set("Allow", "GET, PUT, DELETE");
+  res.status(405);
+  res.send({"Message":"Method Not Allowed"});
+});
+
+app.put('/groups/:id', async (req, res) => {
+  
+  const id = req.params.id;
+  const name = req.body.name;
+  const desc = req.body.desc;
+  const children = req.body.children;
+  
+  try {
+
+    await Group.updateOne({"id": id}, {
+      "id": id,
+      "group_name": name,
+      "description": desc,
+      "children": children
+    });
+
+    res.status(200);
+    res.send({"Message": "Successfully updated!"});
+    
+  } catch (err) {
+    //console.log(err);
+    res.status(500);
+    res.send({"Message": "Error: " + err})
+  };
+
+});
+
+app.delete('/groups/:id', async (req, res) => {
+  
+  const id = req.params.id;
+
+  try {
+    const data = await Group.deleteOne({"id": id});
+    res.status(200);
+    res.send(data);
+
+  } catch (err) {
+    console.log(err);
+    res.send(500);
+    res.send({ "Message": "Error: " + err });
+  };
+
 });
 
 module.exports = app;

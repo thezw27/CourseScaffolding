@@ -6,11 +6,11 @@ import makeAnimated from 'react-select/animated';
 import Header from "../components/header";
 //import SelectSearch, { SelectedOptionValue } from 'react-select-search';
 //import 'react-select-search/style.css';
-import { Concept, Course, Skill, Link, SelectOption } from '@/contexts/PageContext';
+import { Concept, Course, Skill, Group, Link, SelectOption } from '@/contexts/PageContext';
 
 const DB = process.env.NEXT_PUBLIC_DB;
 
-export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
+export default function Admin({data}:{data: [Course[], Skill[], Concept[], Group[]]}) {
 
   const animatedComponents = makeAnimated();
   const customStyles = {
@@ -35,7 +35,15 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
     .sort((a, b) => a.label.localeCompare(b.label));
   conceptData.unshift(({ label: "New Concept",  value: conceptData.length > 0 ? Math.max(...conceptData.map(item => item.value)) + 1 : 0 }));
 
-  const [type, setType] = useState<'Courses' | 'Concepts' | 'Skills'>('Courses');
+  console.log(data);
+  console.log("hi");
+  const groupData: SelectOption[] = data[3]
+    .map(({ id, group_name } : { id:number, group_name:string }) => ({ label: group_name, value: id}))
+    .sort((a, b) => a.label.localeCompare(b.label));
+  groupData.unshift(({ label: "New Group", value: groupData.length > 0 ? Math.max(...groupData.map(item => item.value)) + 1 : 0 }));
+  
+
+  const [type, setType] = useState<'Courses' | 'Concepts' | 'Skills' | 'Groups'>('Courses');
   const [form, setForm] = useState<React.JSX.Element>(<form></form>);
   const [resourceButton, setResourceButton] = useState<React.JSX.Element>(<div></div>);
   const [resourceMenuButton, setResourceMenuButton] = useState<React.JSX.Element>(<div></div>);
@@ -60,6 +68,7 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
   const [resourceType, setResourceType] = useState<'video' | 'article'>('video');
   const [options, setOptions] = useState<SelectOption[]>([]);
   const [resourceEditToggle, setResourceEditToggle] = useState<'hidden' | 'block'>('hidden');
+  const [children, setChildren] = useState<number[]>([]);
 
   //0 is none, 1 is create, 2 is edit/delete
   const [resourceButtonId, setResourceButtonId] = useState<number>(0);
@@ -85,6 +94,10 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
     {
       label: "Skills",
       value: "Skills"
+    },
+    {
+      label: "Groups",
+      value: "Groups"
     }
   ]
 
@@ -128,7 +141,7 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
           "followups": followups.map(o => o.value),
           "coreqs": coreqs.map(o => o.value)
         }
-      } else {
+      } else if (type == "Skills") {
         reqData = {
           "id": id,
           "name": name,
@@ -139,6 +152,13 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
           "followups": followups.map(o => o.value),
           "coreqs": coreqs.map(o => o.value),
           "links": resources
+        }
+      } else if (type == "Groups") {
+        reqData = {
+          "id": id,
+          "name": name,
+          "desc": desc,
+          "children": children
         }
       }
 
@@ -186,7 +206,7 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
         alert("Error! " + err);
       })
     } else if (reqType == "delete") {
-      console.log(id);
+     
       fetch(DB + '/' + type.toLowerCase() + '/' + id, {
         method: 'DELETE',
         headers: {
@@ -290,6 +310,9 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
         case 'Concepts':
           i = 2;
           break;
+        case 'Groups':
+          i = 3;
+          break;
         default:
           i = -1;
           break;
@@ -304,6 +327,9 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
           break;
         case 'Concepts':
           i = 2;
+          break;
+        case 'Groups':
+          i = 3;
           break;
         default:
           i = -1;
@@ -331,6 +357,7 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
       setResourceName('');
       setResourceLink('');
       setResourceType('video');
+      setChildren([]);
       
       toggleResourceMenuButton(0);
 
@@ -377,6 +404,8 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
           label: name, 
           value: cntr++ 
         })));
+      } else if (i == 3) {
+        setChildren(data[i].find(obj => obj.id === event)!.children);
       }
       setResourceName('');
       setResourceLink('');
@@ -529,58 +558,76 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
         setOptions(conceptData);
         setForm(
           
-            <form className="flex flex-col m-1" onSubmit={handleSubmit}>
-              
-              <Input name="Concept Name" id="name" setter={setName} value={name} />
-              <Input name="Description" id="desc" setter={setDesc} value={desc} />  
+          <form className="flex flex-col m-1" onSubmit={handleSubmit}>
+            
+            <Input name="Concept Name" id="name" setter={setName} value={name} />
+            <Input name="Description" id="desc" setter={setDesc} value={desc} />  
 
-              <label htmlFor="conceptSelect">Connected Skills</label>
-              <Select styles={customStyles} options={skillData.slice(1)} value={skills} closeMenuOnSelect={false} components={animatedComponents} isMulti menuPlacement="top" onChange={(event) => {setSkills(event)}}/>
-              
-              <label htmlFor="skillSelect">Connected Courses</label>
-              <Select styles={customStyles} options={courseData.slice(1)} value={courses} closeMenuOnSelect={false} components={animatedComponents} isMulti menuPlacement="top" onChange={(event) => {setCourses(event)}}/>
-              
-              <label htmlFor="conceptSelect">Prerequisite Concepts</label>
-              <Select styles={customStyles} options={conceptData.slice(1)} value={prereqs} closeMenuOnSelect={false} components={animatedComponents} isMulti menuPlacement="top" onChange={(event) => {setPrereqs(event)}}/>
-              
-              <label htmlFor="skillSelect">Related Concepts</label>
-              <Select styles={customStyles} options={conceptData.slice(1)} value={coreqs} closeMenuOnSelect={false} components={animatedComponents} isMulti menuPlacement="top" onChange={(event) => {setCoreqs(event)}}/>
-              
-              <label htmlFor="conceptSelect">Follow up Concepts</label>
-              <Select styles={customStyles} options={conceptData.slice(1)} value={followups} closeMenuOnSelect={false} components={animatedComponents} isMulti menuPlacement="top" onChange={(event) => {setFollowups(event)}}/>
+            <label htmlFor="conceptSelect">Connected Skills</label>
+            <Select styles={customStyles} options={skillData.slice(1)} value={skills} closeMenuOnSelect={false} components={animatedComponents} isMulti menuPlacement="top" onChange={(event) => {setSkills(event)}}/>
+            
+            <label htmlFor="skillSelect">Connected Courses</label>
+            <Select styles={customStyles} options={courseData.slice(1)} value={courses} closeMenuOnSelect={false} components={animatedComponents} isMulti menuPlacement="top" onChange={(event) => {setCourses(event)}}/>
+            
+            <label htmlFor="conceptSelect">Prerequisite Concepts</label>
+            <Select styles={customStyles} options={conceptData.slice(1)} value={prereqs} closeMenuOnSelect={false} components={animatedComponents} isMulti menuPlacement="top" onChange={(event) => {setPrereqs(event)}}/>
+            
+            <label htmlFor="skillSelect">Related Concepts</label>
+            <Select styles={customStyles} options={conceptData.slice(1)} value={coreqs} closeMenuOnSelect={false} components={animatedComponents} isMulti menuPlacement="top" onChange={(event) => {setCoreqs(event)}}/>
+            
+            <label htmlFor="conceptSelect">Follow up Concepts</label>
+            <Select styles={customStyles} options={conceptData.slice(1)} value={followups} closeMenuOnSelect={false} components={animatedComponents} isMulti menuPlacement="top" onChange={(event) => {setFollowups(event)}}/>
 
-              {resourceMenuButton}
-              <div className={resourceEditToggle + ' w-3/5 h-3/5 absolute z-50 bg-white border-2 border-black p-10'}>
-              
-                <Select 
-                  id="resource"
-                  options={[{label: "New Resource", value: resources.length > 0 ? Math.max(...resources.map(link => link.id)) + 1 : 0 }, ...resourceOptions]} 
-                  value={selectedResource}
-                  onChange={(event) => {updateResourceFields((event as {label: string}).label); setSelectedResource(event);}
-                  }
-                />
+            {resourceMenuButton}
+            <div className={resourceEditToggle + ' w-3/5 h-3/5 absolute z-50 bg-white border-2 border-black p-10'}>
+            
+              <Select 
+                id="resource"
+                options={[{label: "New Resource", value: resources.length > 0 ? Math.max(...resources.map(link => link.id)) + 1 : 0 }, ...resourceOptions]} 
+                value={selectedResource}
+                onChange={(event) => {updateResourceFields((event as {label: string}).label); setSelectedResource(event);}
+                }
+              />
 
-                <Input name="Resource Name" id="rname" setter={setResourceName} value={resourceName} />
-                <Input name="Resource Link" id="rlink" setter={setResourceLink} value={resourceLink} />
-                <label htmlFor="Resource Type">Resource Type</label>
-                <Select name="Resource Type" id="rtype" options={[{label: "Video", value: "video"}, {label: "Article", value: "article"}]} value={{label: resourceType.charAt(0).toUpperCase() + resourceType.slice(1), value: resourceType}} onChange={(event) => {setResourceType((event as {value: string}).value as "article" | "video")}} />
+              <Input name="Resource Name" id="rname" setter={setResourceName} value={resourceName} />
+              <Input name="Resource Link" id="rlink" setter={setResourceLink} value={resourceLink} />
+              <label htmlFor="Resource Type">Resource Type</label>
+              <Select name="Resource Type" id="rtype" options={[{label: "Video", value: "video"}, {label: "Article", value: "article"}]} value={{label: resourceType.charAt(0).toUpperCase() + resourceType.slice(1), value: resourceType}} onChange={(event) => {setResourceType((event as {value: string}).value as "article" | "video")}} />
 
-                {resourceButton}
-                <button className="btn btn-primary" type="button" onClick={closeResources}>Close</button>
-              </div>
-              
-              {button}
+              {resourceButton}
+              <button className="btn btn-primary" type="button" onClick={closeResources}>Close</button>
+            </div>
+            
+            {button}
 
-            </form>
+          </form>
         )
         break;
-      default:
+      case 'Groups':
+        setOptions(groupData);
+        setForm(
+          
+          <form className="flex flex-col m-1" onSubmit={handleSubmit}>
+            
+            <Input name="Concept Name" id="name" setter={setName} value={name} />
+            <Input name="Description" id="desc" setter={setDesc} value={desc} />  
+
+            <label htmlFor="conceptSelect">Courses in this group</label>
+            <Select styles={customStyles} options={courseData.slice(1)} value={courseData.filter(obj => children.includes(obj.value))} closeMenuOnSelect={false} components={animatedComponents} isMulti menuPlacement="top" onChange={(event) => {setChildren(event.map(obj => obj.value))}}/>
+        
+            {button}
+
+          </form>
+        )
+        break;
+        
+        default:
         setForm(
           <p>Error!</p>
         )
         break;
     }
-  }, [type, id, name, deptcode, coursecode, desc, concepts, courses, prereqs, coreqs, skills, followups, resourceEditToggle, resourceLink, resourceName, resourceType, resourceButton, selectedResource, resourceMenuButton, button, resourceId])
+  }, [type, id, name, deptcode, coursecode, desc, concepts, courses, prereqs, coreqs, skills, followups, resourceEditToggle, resourceLink, resourceName, resourceType, resourceButton, selectedResource, resourceMenuButton, button, resourceId, children])
 
   useEffect(() => {
     if (options && init) {
@@ -588,12 +635,14 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
       if (options[0]) {
         updateFields(options[0].value);
         setInit(false);
+    console.log('no');
       }
     }
   }, [type, form]);
 
   useEffect(() => {
-    setObjVal(options[0]);
+    //setObjVal(options[0]);
+    console.log('n1o');
   }, [options]);
 
   return (
@@ -607,8 +656,8 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
           defaultValue={menuOptions[0]}
           isSearchable={false}
           onChange={(event) => {
-            setType((event as { value: string }).value as "Courses" | "Concepts" | "Skills" );
-            updateFields(0, (event as { value: string }).value as "Courses" | "Concepts" | "Skills" );
+            setType((event as { value: string }).value as "Courses" | "Concepts" | "Skills" | "Groups" );
+            updateFields(0, (event as { value: string }).value as "Courses" | "Concepts" | "Skills" | "Groups");
           }}
         />
         <label htmlFor="objSelect">{type}</label>
@@ -616,7 +665,7 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[]]}) {
           id="objSelect" 
           options={options}
           value={objVal} 
-          onChange={(event) => { updateFields((event as { value: number}).value); setObjVal(event); }}
+          onChange={(event) => { updateFields((event as { value: number}).value); setObjVal(event); console.log(event); }}
           />
         {form}
       </div>
