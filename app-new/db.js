@@ -1,6 +1,5 @@
 //All API calls
 
-const { group } = require('console');
 const express = require('express');
 const app = express.Router();
 const mongoose = require('mongoose');
@@ -1010,10 +1009,10 @@ app.post('/groups', async (req, res) => {
 
   try {
     const group = new Group({
-      id: id,
-      group_name: name,
-      desc: desc,
-      children: children
+      "id": id,
+      "group_name": name,
+      "description": desc,
+      "children": children
     })
     await group.save();
 

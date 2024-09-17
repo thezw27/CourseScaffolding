@@ -405,6 +405,8 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[], Group
           value: cntr++ 
         })));
       } else if (i == 3) {
+        setName(data[i].find(obj => obj.id === event)!.group_name);
+        setDesc(data[i].find(obj => obj.id === event)!.description);
         setChildren(data[i].find(obj => obj.id === event)!.children);
       }
       setResourceName('');
@@ -609,7 +611,7 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[], Group
           
           <form className="flex flex-col m-1" onSubmit={handleSubmit}>
             
-            <Input name="Concept Name" id="name" setter={setName} value={name} />
+            <Input name="Group Name" id="name" setter={setName} value={name} />
             <Input name="Description" id="desc" setter={setDesc} value={desc} />  
 
             <label htmlFor="conceptSelect">Courses in this group</label>
