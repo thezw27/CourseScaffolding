@@ -35,8 +35,6 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[], Group
     .sort((a, b) => a.label.localeCompare(b.label));
   conceptData.unshift(({ label: "New Concept",  value: conceptData.length > 0 ? Math.max(...conceptData.map(item => item.value)) + 1 : 0 }));
 
-  console.log(data);
-  console.log("hi");
   const groupData: SelectOption[] = data[3]
     .map(({ id, group_name } : { id:number, group_name:string }) => ({ label: group_name, value: id}))
     .sort((a, b) => a.label.localeCompare(b.label));
@@ -336,7 +334,10 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[], Group
           break;
       }
     };
-
+    if (event == -1 && i >= 0) {
+      const ids = data[i].map((item: { id: number }) => item.id);
+      event = Math.min(...ids);
+    }
     //If event == new course
     if (event == Math.max(...data[i].map(item => item.id)) + 1 || data[i].length == 0) {
 
@@ -362,7 +363,8 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[], Group
       toggleResourceMenuButton(0);
 
     } else {
-
+      console.log('hello');
+      console.log(data[i].find(obj => obj.id === event))
       setDesc(data[i].find(obj => obj.id === event)!.description);
       setId(data[i].find(obj => obj.id === event)!.id);
       setButtonType("exists");
@@ -637,14 +639,14 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[], Group
       if (options[0]) {
         updateFields(options[0].value);
         setInit(false);
-    console.log('no');
+    //console.log('no');
       }
     }
   }, [type, form]);
 
   useEffect(() => {
     //setObjVal(options[0]);
-    console.log('n1o');
+    //console.log('n1o');
   }, [options]);
 
   return (
@@ -659,7 +661,7 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[], Group
           isSearchable={false}
           onChange={(event) => {
             setType((event as { value: string }).value as "Courses" | "Concepts" | "Skills" | "Groups" );
-            updateFields(0, (event as { value: string }).value as "Courses" | "Concepts" | "Skills" | "Groups");
+            updateFields(-1, (event as { value: string }).value as "Courses" | "Concepts" | "Skills" | "Groups");
           }}
         />
         <label htmlFor="objSelect">{type}</label>

@@ -82,7 +82,8 @@ export interface DataType {
   courses: Course[], setCourses: (courses: Course[]) => void,
   concepts: Concept[], setConcepts: (courses: Concept[]) => void,
   skills: Skill[], setSkills: (courses: Skill[]) => void,
-  graphType: string, setGraphType: (val: string) => void
+  graphType: string, setGraphType: (val: string) => void,
+  filteredNodes: number[], setFilteredNodes: (arr: number[]) => void
 }
 
 export const DataContext = createContext<DataType>({
@@ -95,7 +96,8 @@ export const DataContext = createContext<DataType>({
   courses: [], setCourses: (courses: Course[]) => {},
   concepts: [], setConcepts: (courses: Concept[]) => {},
   skills: [], setSkills: (courses: Skill[]) => {},
-  graphType: "Courses", setGraphType: (val: string) => {}
+  graphType: "Courses", setGraphType: (val: string) => {},
+  filteredNodes: [], setFilteredNodes: (arr: number[]) => {}
 })
 
 export default function PageContext({
@@ -113,6 +115,8 @@ export default function PageContext({
   const [currentNodes, setNodes, onNodesChange] = useNodesState<Node[]>([]);
   const [currentEdges, setEdges, onEdgesChange] = useEdgesState<Edge[]>([]);
 
+  const [filteredNodes, setFilteredNodes] = useState<number[]>([]);
+
   return (
     <DataContext.Provider
       value={{
@@ -123,7 +127,8 @@ export default function PageContext({
         courses, setCourses,
         skills, setSkills,
         concepts, setConcepts,
-        graphType, setGraphType
+        graphType, setGraphType,
+        filteredNodes, setFilteredNodes
       }}
     >
       {children}

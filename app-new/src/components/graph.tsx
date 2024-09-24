@@ -17,7 +17,6 @@ import ReactFlow, {
 } from "reactflow";
 import "reactflow/dist/style.css";
 import ContextMenu from './contextmenu';
-import dagre from "dagre";
 
 import ELK from 'elkjs/lib/elk.bundled.js';
 
@@ -51,7 +50,7 @@ const GraphComponent = ({data}:{data:[Course[], Skill[], Concept[]]}) => {
   const [hoveredNode, setHoveredNode] = useState<Node>();
   const [hoverEvent, setHoverEvent] = useState<React.MouseEvent>();
 
-  const { graphType } = useContext(DataContext);
+  const { graphType, filteredNodes } = useContext(DataContext);
 
   const elk = new ELK();
   const elkOptions = {
@@ -62,7 +61,7 @@ const GraphComponent = ({data}:{data:[Course[], Skill[], Concept[]]}) => {
  
   useEffect(() => {
 
-    const [tempNodes, tempEdges] = setGraphCourses(graphType, data);
+    const [tempNodes, tempEdges] = setGraphCourses(graphType, data, filteredNodes);
     getLayoutedElements(tempNodes, tempEdges)
     .then((resp) => {
       // @ts-ignore
@@ -74,7 +73,8 @@ const GraphComponent = ({data}:{data:[Course[], Skill[], Concept[]]}) => {
         shouldFitView.current = true; 
       }
     });
-  }, [data, graphType]);
+
+  }, [data, graphType, filteredNodes]);
 
   useEffect(() => {
     if (shouldFitView.current) {
@@ -210,7 +210,7 @@ const GraphComponent = ({data}:{data:[Course[], Skill[], Concept[]]}) => {
         type: menu.type
       })
     }
-  }, [menu])
+  }, [menu]);
 
   return (
     <div className="flex m-10" style={{ width: width, height: height}}>
@@ -249,7 +249,7 @@ const Graph = ({data}:{data:[Course[], Skill[], Concept[]]}) => {
 
 export default Graph;
 
-const setGraphCourses = (graphType: string, data:[Course[], Skill[], Concept[]]): [Node[], Edge[]] => {
+const setGraphCourses = (graphType: string, data:[Course[], Skill[], Concept[]], filteredNodes: number[]): [Node[], Edge[]] => {
   if (graphType == "Concepts") {
     const node:Node[] = data[2].map(
       ({id, concept_name, courses} : Concept) => (
@@ -320,7 +320,14 @@ const setGraphCourses = (graphType: string, data:[Course[], Skill[], Concept[]])
     }
     return [node, links]
   } else {
-    const node:Node[] = data[0].map(
+    let filteredData;
+    if (filteredNodes.length == 0) {
+      filteredData = data[0]
+    } else {
+      filteredData = data[0].filter(obj => filteredNodes.includes(obj.id));
+    }
+    const node:Node[] = filteredData
+    .map(
       ({ id, course_name } : Course) => (
         {
           id: id.toString(), 
@@ -331,21 +338,41 @@ const setGraphCourses = (graphType: string, data:[Course[], Skill[], Concept[]])
         }
       )
     );
-
     let links: Edge[] = [];
-    let i = 0;
-    for (const course of data[0]) {
-      for (const prereqId of course.prereqs) {
-        const link:Edge = {
-          'type': 'smoothstep',
-          'source': prereqId.toString(), 
-          'target': course.id.toString(),
-          'id': i.toString()
+    if (filteredNodes.length == 0) {
+      let i = 0;
+      for (const course of data[0]) {
+        for (const prereqId of course.prereqs) {
+          const link:Edge = {
+            'type': 'smoothstep',
+            'source': prereqId.toString(), 
+            'target': course.id.toString(),
+            'id': i.toString()
+          }
+          links.push(link);
+          i++;
         }
-        links.push(link);
-        i++;
+      }
+    } else {
+      let i = 0;
+      for (const course of filteredData) {
+        for (const prereqId of course.prereqs) {
+            console.log(prereqId);
+          if (filteredNodes.includes(prereqId)) {
+            console.log(prereqId);
+            const link:Edge = {
+            'type': 'smoothstep',
+            'source': prereqId.toString(), 
+            'target': course.id.toString(),
+            'id': i.toString()
+          }
+          links.push(link);
+          i++;
+          }
+        }
       }
     }
+    console.log(node, links);
     return [node, links]
   }
 };
