@@ -31,7 +31,9 @@ export interface Course {
   followups: number[],
   coreqs: number[],
   skills: number[],
-  concepts:number[]
+  requiredSkills: number[],
+  concepts: number[],
+  requiredConcepts: number[]
 }
 
 export interface Concept {

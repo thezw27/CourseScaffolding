@@ -74,7 +74,7 @@ const GraphComponent = ({data}:{data:[Course[], Skill[], Concept[]]}) => {
       }
     });
 
-  }, [data, graphType, filteredNodes]);
+  }, [graphType, filteredNodes]);
 
   useEffect(() => {
     if (shouldFitView.current) {
@@ -357,7 +357,6 @@ const setGraphCourses = (graphType: string, data:[Course[], Skill[], Concept[]],
       let i = 0;
       for (const course of filteredData) {
         for (const prereqId of course.prereqs) {
-            console.log(prereqId);
           if (filteredNodes.includes(prereqId)) {
             console.log(prereqId);
             const link:Edge = {

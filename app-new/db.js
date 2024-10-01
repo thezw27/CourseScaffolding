@@ -39,7 +39,9 @@ const coursesSchema = new mongoose.Schema({
   coreqs: [Number],
   followups: [Number],
   skills: [Number],
-  concepts: [Number]
+  requiredSkills: [Number],
+  concepts: [Number],
+  requiredConcepts: [Number],
 });
 const Course = mongoose.model('Course', coursesSchema);
 
@@ -363,7 +365,9 @@ app.post('/courses',  async (req, res) => {
   const coreqs = req.body.coreqs;
   const followups = req.body.followups;
   const skills = req.body.skills;
+  const reqskills = req.body.reqskills;
   const concepts = req.body.concepts;  
+  const reqconcepts = req.body.reqconcepts; 
 
   try {
     const course = new Course({
@@ -376,7 +380,9 @@ app.post('/courses',  async (req, res) => {
       "coreqs": coreqs,
       "followups": followups,
       "skills": skills,
-      "concepts": concepts
+      "requiredSkills": reqskills,
+      "concepts": concepts,
+      "requiredConcepts": reqconcepts
     })
     await course.save();
 
@@ -502,6 +508,8 @@ app.put('/courses/:id',  async (req, res) => {
   const followups = req.body.followups;
   const skills = req.body.skills;
   const concepts = req.body.concepts;
+  const reqskills = req.body.reqskills;
+  const reqconcepts = req.body.reqconceppts;
 
   try {
 
@@ -511,7 +519,6 @@ app.put('/courses/:id',  async (req, res) => {
       return res.status(404).send({ "Message": "Course not found" });
     }
 
-    console.log("bruh", desc);
     console.log(req.body);
     await Course.updateOne({"id": id}, {
       "department_code": depcode,
@@ -522,7 +529,9 @@ app.put('/courses/:id',  async (req, res) => {
       "coreqs": coreqs,
       "followups": followups,
       "skills": skills,
-      "concepts": concepts
+      "requiredSkills": reqskills,
+      "concepts": concepts,
+      "requiredConcepts": reqconcepts
     });
 
     const addedSkills = skills.filter(skill => !originalCourse.skills.includes(skill));

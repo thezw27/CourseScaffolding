@@ -43,7 +43,6 @@ export default function ContextMenu(
       onMouseLeave={() => onHover(false)}
     >
       <p style={{ margin: '0.5em' }}>{label}</p>
-
       {courses}
     
     </div>

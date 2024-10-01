@@ -1,5 +1,5 @@
 'use client';
-import React, { useRef, useContext, useState } from 'react';
+import React, { useRef, useContext, useState, useEffect } from 'react';
 import { DataContext, Group, SelectOption } from '@/contexts/PageContext';
 import Draggable, { DraggableEvent } from 'react-draggable';
 import Button from './button';
@@ -8,8 +8,8 @@ import makeAnimated from 'react-select/animated';
 
 const Menu = ({data}:{data:Group[]}) => {
   
-  const [groupSelection, setGroupSelection] = useState<MultiValue<SelectOption>>([]);
-
+  const [groupSelection, setGroupSelection] = useState<MultiValue<SelectOption>>([{'label': 'ECSE Core', 'value': 4}, {'label': 'EE Core', 'value': 5}, {'label': 'CSE Core', 'value': 6}]);
+  
   const GroupOptions: SelectOption[] = data
   .map(({ id, group_name } : { id:number, group_name:string }) => ({ label: group_name, value: id }))
   //.sort((a, b) => a.label.localeCompare(b.label));
@@ -33,9 +33,13 @@ const Menu = ({data}:{data:Group[]}) => {
     }
     setFilteredNodes(Array.from(new Set(out)));
   }
+  
+  useEffect(() => {
+   setNodes(data, groupSelection.map(obj => obj.value));
+  }, []);
 
   return (
-    <Draggable nodeRef={draggableRef} positionOffset={{ x: '-30vw', y: '-30vh' }} >
+    <Draggable nodeRef={draggableRef} positionOffset={{ x: '-35vw', y: '-35vh' }} >
       <div style={{ width: '25vw', position: "absolute", zIndex: "1",}} ref={draggableRef} className="border-2 bg-gray-400 p-5">
         
         <div className="flex flex-row justify-between mb-4">

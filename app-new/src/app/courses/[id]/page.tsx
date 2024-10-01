@@ -90,12 +90,13 @@ const populateRelationships = async (data: Course) => {
 
   let skillsList = [];
   let conceptsList = [];
+  let reqskillsList = [];
+  let reqconceptsList = [];
 
   for (let i = 0; i < data.skills.length; i++) {
     try {
       const resp = await fetch(DB + "/skills/" + data.skills[i]);
       const d: Skill = await resp.json();
-      console.log(1, d);
 
       skillsList.push(<li className="link" key={d.id}><a href= {'/skills/' + d.id} > { d.skill_name } </a></li>);
     } catch (err) {
@@ -114,15 +115,60 @@ const populateRelationships = async (data: Course) => {
     }
   }
 
+  for (let i = 0; i < data.requiredSkills.length; i++) {
+    try {
+      const resp = await fetch(DB + "/skills/" + data.requiredSkills[i]);
+      const d: Skill = await resp.json();
+
+      reqskillsList.push(<li className="link" key={d.id}><a href= {'/skills/' + d.id} > { d.skill_name } </a></li>);
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
+  for (let i = 0; i < data.requiredConcepts.length; i++) {
+    try {
+      const resp = await fetch(DB + "/concepts/" + data.requiredConcepts[i]);
+      const d: Concept = await resp.json();
+
+      reqconceptsList.push(<li className="link" key={d.id}><a href= {'/concepts/' + d.id} > { d.concept_name } </a></li>);
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
   return (
-    <div className="w-1/3 text-center">
-
-      <h3>Skills used in this course</h3>
-      <ul className="mb-4">{skillsList}</ul>
-
-      <h3>Concepts learned in this course</h3>
-      <ul className="mb-4">{conceptsList}</ul>
-
+    <div className="w-1/3">
+      <div className="flex justify-between">
+        <div className="w-1/2 text-center">
+          <h3 className="font-bold">Skills required by this course</h3>
+          <ul className="mb-4">{reqskillsList}</ul>
+        </div>
+        <div className="w-1/2 text-center">
+          <h3 className="font-bold">Skills learned in this course</h3>
+          <ul className="mb-4">{skillsList}</ul>
+        </div>
+      </div>
+      
+      <div className="flex justify-between">
+        <div className="w-1/2 text-center">
+          <h3 className="font-bold">Concepts required by this course</h3>
+          <ul className="mb-4">{reqconceptsList}</ul>
+        </div>
+        <div className="w-1/2 text-center">
+          <h3 className="font-bold">Concepts learned in this course</h3>
+          <ul className="mb-4">{conceptsList}</ul>
+        </div>
+      </div>
     </div>
   );
+
+
+}
+
+const getGroups = async (data: Course) => {
+  const groupNames = [];
+
+  //TODO 
+  //add group relations inside course object
 }

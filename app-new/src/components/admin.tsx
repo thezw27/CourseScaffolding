@@ -68,6 +68,9 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[], Group
   const [resourceEditToggle, setResourceEditToggle] = useState<'hidden' | 'block'>('hidden');
   const [children, setChildren] = useState<number[]>([]);
 
+  const [reqConcepts, setReqConcepts] = useState<MultiValue<SelectOption>>([]);
+  const [reqSkills, setReqSkills] = useState<MultiValue<SelectOption>>([]);
+
   //0 is none, 1 is create, 2 is edit/delete
   const [resourceButtonId, setResourceButtonId] = useState<number>(0);
   const [selectedResource, setSelectedResource] = useState<SingleValue<SelectOption>>();
@@ -134,7 +137,9 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[], Group
           "coursecode": coursecode,
           "desc": desc,
           "skills": skills.map(o => o.value),
+          "reqskills": reqSkills.map(o => o.value),
           "concepts": concepts.map(o => o.value),
+          "reqconcepts": reqConcepts.map(o => o.value),
           "prereqs": prereqs.map(o => o.value),
           "followups": followups.map(o => o.value),
           "coreqs": coreqs.map(o => o.value)
@@ -159,9 +164,8 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[], Group
           "children": children
         }
       }
-
     }
-
+    
     if (reqType == "create") {
       fetch(DB + '/' + type.toLowerCase(), {
         method: 'POST',
@@ -351,6 +355,8 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[], Group
       setCourses([]);
       setConcepts([]);
       setSkills([]);
+      setReqConcepts([]);
+      setReqSkills([]);
       setPrereqs([]);
       setCoreqs([]);
       setFollowups([]);
@@ -378,6 +384,8 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[], Group
         setCoursecode(data[i].find(obj => obj.id === event)!.course_code);
         setConcepts(data[i].find(obj => obj.id === event)!.concepts.map(id => conceptData.find(c => c.value === id)).filter((c): c is SelectOption => c !== undefined));
         setSkills(data[i].find(obj => obj.id === event)!.skills.map(id => skillData.find(c => c.value === id)).filter((c): c is SelectOption => c !== undefined));
+        setReqConcepts(data[i].find(obj => obj.id === event)!.requiredConcepts.map(id => conceptData.find(c => c.value === id)).filter((c): c is SelectOption => c !== undefined));
+        setReqSkills(data[i].find(obj => obj.id === event)!.requiredSkills.map(id => skillData.find(c => c.value === id)).filter((c): c is SelectOption => c !== undefined));
         setPrereqs(data[i].find(obj => obj.id === event)!.prereqs.map(id => courseData.find(c => c.value === id)).filter((c): c is SelectOption => c !== undefined));
         setCoreqs(data[i].find(obj => obj.id === event)!.coreqs.map(id => courseData.find(c => c.value === id)).filter((c): c is SelectOption => c !== undefined));
         setFollowups(data[i].find(obj => obj.id === event)!.followups.map(id => courseData.find(c => c.value === id)).filter((c): c is SelectOption => c !== undefined));
@@ -493,12 +501,28 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[], Group
               <Input name="Course Code" id="code" setter={setCoursecode} value={coursecode} />
               <Input name="Description" id="desc" setter={setDesc} value={desc} />
 
-              <label htmlFor="conceptSelect">Connected Concepts</label>
-              <Select styles={customStyles} options={conceptData.slice(1)} value={concepts} closeMenuOnSelect={false} components={animatedComponents} isMulti menuPlacement="top" onChange={(event) => {setConcepts(event)}}/>
-              
-              <label htmlFor="skillSelect">Connected Skills</label>
-              <Select styles={customStyles} options={skillData.slice(1)} value={skills} closeMenuOnSelect={false} components={animatedComponents} isMulti menuPlacement="top" onChange={(event) => {setSkills(event)}}/>
-              
+              <div className="flex space-x-4 w-full">
+                <div className='w-1/2'>
+                  <label htmlFor="reqconceptSelect">Required Concepts</label>
+                  <Select styles={customStyles} options={conceptData.slice(1)} value={reqConcepts} closeMenuOnSelect={false} components={animatedComponents} isMulti menuPlacement="top" onChange={(event) => {setReqConcepts(event)}}/>
+                </div>
+                <div className='w-1/2'>
+                  <label htmlFor="conceptSelect">Learned Concepts</label>
+                  <Select styles={customStyles} options={conceptData.slice(1)} value={concepts} closeMenuOnSelect={false} components={animatedComponents} isMulti menuPlacement="top" onChange={(event) => {setConcepts(event)}}/>
+                </div>
+              </div>
+
+              <div className="flex space-x-4 w-full">
+                <div className='w-1/2'>
+                  <label htmlFor="skillSelect">Required Skills</label>
+                  <Select styles={customStyles} options={skillData.slice(1)} value={reqSkills} closeMenuOnSelect={false} components={animatedComponents} isMulti menuPlacement="top" onChange={(event) => {setReqSkills(event)}}/>
+                </div>
+                <div className='w-1/2'>
+                  <label htmlFor="skillSelect">Learned Skills</label>
+                  <Select styles={customStyles} options={skillData.slice(1)} value={skills} closeMenuOnSelect={false} components={animatedComponents} isMulti menuPlacement="top" onChange={(event) => {setSkills(event)}}/>
+                </div>    
+              </div>
+
               <label htmlFor="conceptSelect">Prerequisite Courses</label>
               <Select styles={customStyles} options={courseData.slice(1)} value={prereqs} closeMenuOnSelect={false} components={animatedComponents} isMulti menuPlacement="top" onChange={(event) => {setPrereqs(event)}}/>
               
@@ -632,7 +656,7 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[], Group
         )
         break;
     }
-  }, [type, id, name, deptcode, coursecode, desc, concepts, courses, prereqs, coreqs, skills, followups, resourceEditToggle, resourceLink, resourceName, resourceType, resourceButton, selectedResource, resourceMenuButton, button, resourceId, children])
+  }, [reqConcepts, reqSkills, type, id, name, deptcode, coursecode, desc, concepts, courses, prereqs, coreqs, skills, followups, resourceEditToggle, resourceLink, resourceName, resourceType, resourceButton, selectedResource, resourceMenuButton, button, resourceId, children])
 
   useEffect(() => {
     if (options && init) {
