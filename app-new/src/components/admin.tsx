@@ -336,7 +336,8 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[], Group
     };
     if (event == -1 && i >= 0) {
       const ids = data[i].map((item: { id: number }) => item.id);
-      event = Math.min(...ids);
+      event = Math.max(...ids);
+      event = event + 1;
     }
     //If event == new course
     if (event == Math.max(...data[i].map(item => item.id)) + 1 || data[i].length == 0) {
