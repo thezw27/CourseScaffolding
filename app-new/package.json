@@ -9,13 +9,15 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "cookie": "^1.0.1",
     "cors": "^2.8.5",
     "dagre": "^0.8.5",
     "dotenv": "^16.4.5",
     "elkjs": "^0.9.3",
     "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.4.1",
-    "next": "14.2.3",
+    "next": "^14.2.15",
     "react": "^18",
     "react-dom": "^18",
     "react-draggable": "^4.4.6",
@@ -26,6 +28,7 @@
   },
   "devDependencies": {
     "@types/dagre": "^0.7.52",
+    "@types/jsonwebtoken": "^9.0.7",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",

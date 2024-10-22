@@ -1,6 +1,6 @@
 import React from 'react';
-import Admin from '../../components/admin';
 import { Concept, Course, Skill, Group } from '@/contexts/PageContext';
+import AuthCheck from '@/components/authcheck';
 
 const DB = process.env.DB;
 
@@ -10,7 +10,7 @@ export default async function Page() {
 
   return (
     <main>
-      <Admin data={data} />
+      <AuthCheck data={data} />
     </main>
   )
 }
