@@ -1082,32 +1082,32 @@ app.put('/groups/:id', async (req, res) => {
   const children = req.body.children;
   
   try {
-
+    console.log(1);
     originalGroup = await Group.findOne({"id": id});
-
+    console.log(2);
     await Group.updateOne({"id": id}, {
       "id": id,
       "group_name": name,
       "description": desc,
       "children": children
     });
-
+    console.log(3);
     const addedChildren = children.filter(child => !originalGroup.children.includes(child));
     const removedChildren = originalGroup.children.filter(child => !child.includes(child));
     
     await Promise.all(
       addedChildren.map(course => Course.updateOne({ 'id': course }, { $push: { groups: id } }))
     );
-
+    console.log(4);
     await Promise.all(
       removedChildren.map(course => Course.updateOne({ 'id': course }, { $pull: { groups: id } }))
     );
-
+    console.log(5);
     res.status(200);
     res.send({"Message": "Successfully updated!"});
     
   } catch (err) {
-    //console.log(err);
+    console.log(err);
     res.status(500);
     res.send({"Message": "Error: " + err})
   };
