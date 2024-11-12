@@ -8,7 +8,7 @@ import makeAnimated from 'react-select/animated';
 
 const Menu = ({data}:{data:Group[]}) => {
   
-  const [groupSelection, setGroupSelection] = useState<MultiValue<SelectOption>>([{'label': 'ECSE Core', 'value': 4}, {'label': 'EE Core', 'value': 5}, {'label': 'CSE Core', 'value': 6}]);
+  const [groupSelection, setGroupSelection] = useState<MultiValue<SelectOption>>([{'label': 'ECSE Core', 'value': 0}, {'label': 'EE Core', 'value': 1}, {'label': 'CSE Core', 'value': 2}]);
   
   const GroupOptions: SelectOption[] = data
   .map(({ id, group_name } : { id:number, group_name:string }) => ({ label: group_name, value: id }))

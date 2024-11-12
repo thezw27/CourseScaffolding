@@ -33,9 +33,9 @@ export default async function Page({ params }: { params: Params}) {
   
 const populateConcepts = async (data: Concept) => {
 
-  let prereqList = [];
-  let coreqList = [];
-  let followupList = [];
+  let prereqList:React.JSX.Element[] = [];
+  let coreqList:React.JSX.Element[] = [];
+  let followupList:React.JSX.Element[] = []
 
   for (let i = 0; i < data.prereqs.length; i++) {
     try {

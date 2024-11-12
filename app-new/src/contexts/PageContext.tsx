@@ -33,7 +33,8 @@ export interface Course {
   skills: number[],
   requiredSkills: number[],
   concepts: number[],
-  requiredConcepts: number[]
+  requiredConcepts: number[],
+  groups: number[]
 }
 
 export interface Concept {

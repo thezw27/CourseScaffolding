@@ -36,11 +36,12 @@ const GraphComponent = ({data}:{data:[Course[], Skill[], Concept[]]}) => {
 
   const [nodes, setNodes, onNodesChange] = useNodesState<Node[]>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge[]>([]);
-  const [menu, setMenu] = useState<{label:string, top:number, left:number, courseData: {id:string, name:string}[], type: boolean}>({
+  const [menu, setMenu] = useState<{label:string, top:number, left:number, courseData: {id:string, name:string}[], codeData: {dept:string, code:string}, type: boolean}>({
     label: "",
     top: 0,
     left: 0,
     courseData: [],
+    codeData: {dept: "", code: ""},
     type: false
   });
 
@@ -141,6 +142,7 @@ const GraphComponent = ({data}:{data:[Course[], Skill[], Concept[]]}) => {
         top: 0,
         left: 0,
         courseData: [],
+        codeData: {dept: "", code: ""},
         type: false
       })
       setNodeElement(undefined);
@@ -158,6 +160,7 @@ const GraphComponent = ({data}:{data:[Course[], Skill[], Concept[]]}) => {
               top: tempNodeElement.top + tempNodeElement.height,
               left: tempNodeElement.left + tempNodeElement.width/2 - 100,
               courseData: hoveredNode.data.courses,
+              codeData: {dept: hoveredNode.data.dept, code: hoveredNode.data.code},
               type: !!hoveredNode.data.courses
             });
           }
@@ -194,6 +197,7 @@ const GraphComponent = ({data}:{data:[Course[], Skill[], Concept[]]}) => {
         top: rect.top + rect.height,
         left: rect.left + rect.width/2 - 100,
         courseData: menu.courseData,
+        codeData: menu.codeData,
         type: menu.type
       })
     }
@@ -207,6 +211,7 @@ const GraphComponent = ({data}:{data:[Course[], Skill[], Concept[]]}) => {
         top: rect.top + rect.height,
         left: rect.left + rect.width/2 - 100,
         courseData: menu.courseData,
+        codeData: menu.codeData,
         type: menu.type
       })
     }
@@ -328,11 +333,13 @@ const setGraphCourses = (graphType: string, data:[Course[], Skill[], Concept[]],
     }
     const node:Node[] = filteredData
     .map(
-      ({ id, course_name } : Course) => (
+      ({ id, course_name, department_code, course_code } : Course) => (
         {
           id: id.toString(), 
           data : {
-            label: course_name
+            label: course_name,
+            dept: department_code,
+            code: course_code
           },
           position: {x:0, y:0}
         }

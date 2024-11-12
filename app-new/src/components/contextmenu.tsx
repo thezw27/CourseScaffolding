@@ -1,28 +1,29 @@
 import React, { ReactElement, useCallback } from 'react';
 
-export default function ContextMenu(
-  {
-    label, 
-    top, 
-    left, 
-    courseData, 
-    type, 
-    onHover,
-    graphType
-  } : {
-    label:string, 
-    top:number, 
-    left:number, 
-    courseData: {id:string, name:string}[], 
-    type:boolean, 
-    onHover:React.Dispatch<React.SetStateAction<boolean>>,
-    graphType:string
-  }
-) {
+export default function ContextMenu({
+  label, 
+  top, 
+  left, 
+  courseData, 
+  codeData,
+  type, 
+  onHover,
+  graphType
+}:{
+  label:string, 
+  top:number, 
+  left:number, 
+  courseData: {id:string, name:string}[], 
+  codeData: {dept:string, code:string}
+  type:boolean, 
+  onHover:React.Dispatch<React.SetStateAction<boolean>>,
+  graphType:string
+}) {
   if (label == '') {
     return;
   }
   let courses : ReactElement | null = null;
+  let code : ReactElement | null = null;
 
   if (type) {
     courses = (
@@ -33,6 +34,10 @@ export default function ContextMenu(
         ))}
       </ul>
     );
+  } else {
+    code = (
+      <p style={{ margin: '0.25em' }}>{codeData.dept + codeData.code}</p>
+    )
   }
 
   return (
@@ -43,8 +48,10 @@ export default function ContextMenu(
       onMouseLeave={() => onHover(false)}
     >
       <p style={{ margin: '0.5em' }}>{label}</p>
+      {code}
       {courses}
     
     </div>
   );
 }
+

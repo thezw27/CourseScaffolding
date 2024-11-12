@@ -42,6 +42,7 @@ const coursesSchema = new mongoose.Schema({
   requiredSkills: [Number],
   concepts: [Number],
   requiredConcepts: [Number],
+  groups: [Number]
 });
 const Course = mongoose.model('Course', coursesSchema);
 
@@ -589,14 +590,15 @@ app.delete('/courses/:id', async (req, res) => {
       return res.status(404).send({ "Message": "Course not found" });
     }
 
-    const { skills, concepts, prereqs, coreqs, followups } = courseToDelete;
+    const { skills, concepts, prereqs, coreqs, followups, groups } = courseToDelete;
 
     await Promise.all([
       ...skills.map(skill => Skill.updateOne({ 'id': skill }, { $pull: { courses: id } })),
       ...concepts.map(concept => Concept.updateOne({ 'id': concept }, { $pull: { courses: id } })),
       ...prereqs.map(prereq => Course.updateOne({ 'id': prereq }, { $pull: { followups: id } })),
       ...coreqs.map(coreq => Course.updateOne({ 'id': coreq }, { $pull: { coreqs: id } })),
-      ...followups.map(followup => Course.updateOne({ 'id': followup }, { $pull: { prereqs: id } }))
+      ...followups.map(followup => Course.updateOne({ 'id': followup }, { $pull: { prereqs: id } })),
+      ...groups.map(group => Group.updateOne({ 'id': group }, { $pull: { children: id } }))
     ]);
 
     await Course.deleteOne({"id": id});
@@ -1025,6 +1027,10 @@ app.post('/groups', async (req, res) => {
     })
     await group.save();
 
+    await Promise.all(
+      children.map(course => Course.updateOne({ 'id': course }, { $push: { groups: id } }))
+    );
+
     res.status(201);
     res.send({"Message": "Success!"});
   } catch (err) {
@@ -1077,12 +1083,25 @@ app.put('/groups/:id', async (req, res) => {
   
   try {
 
+    originalGroup = await Group.findOne({"id": id});
+
     await Group.updateOne({"id": id}, {
       "id": id,
       "group_name": name,
       "description": desc,
       "children": children
     });
+
+    const addedChildren = children.filter(child => !originalGroup.children.includes(child));
+    const removedChildren = originalGroup.children.filter(child => !child.includes(child));
+    
+    await Promise.all(
+      addedChildren.map(course => Course.updateOne({ 'id': course }, { $push: { groups: id } }))
+    );
+
+    await Promise.all(
+      removedChildren.map(course => Course.updateOne({ 'id': course }, { $pull: { groups: id } }))
+    );
 
     res.status(200);
     res.send({"Message": "Successfully updated!"});
@@ -1100,10 +1119,17 @@ app.delete('/groups/:id', async (req, res) => {
   const id = req.params.id;
 
   try {
+
+    const groupToDelete = await Group.findOne({"id": id});
+    const { children } = groupToDelete;
+
+    await Promise.all(
+      children.map(course => Course.updateOne({ 'id': course }, { $pull: { groups: id } }))
+    );
+
     const data = await Group.deleteOne({"id": id});
     res.status(200);
     res.send(data);
-
   } catch (err) {
     console.log(err);
     res.send(500);

@@ -1,6 +1,6 @@
 import React from 'react';
 import Header from "../../../components/header";
-import { Params, Course, Concept, Skill } from "@/contexts/PageContext";
+import { Params, Course, Concept, Skill, Group} from "@/contexts/PageContext";
 
 const DB = process.env.DB;
 
@@ -9,8 +9,9 @@ export default async function Page({ params }: { params: Params}) {
   const data: Course = await resp.json();
   
 
-  const courseRelationList = await populateCourses(data);
-  const relationships = await populateRelationships(data);
+  const courseRelationList:React.JSX.Element = await populateCourses(data);
+  const relationships:React.JSX.Element = await populateRelationships(data);
+  const groups:React.JSX.Element = await getGroups(data);
 
   return (
     <main>
@@ -20,10 +21,12 @@ export default async function Page({ params }: { params: Params}) {
           <h1 className="text-center text-3xl font-bold m-2">{data.course_name}</h1>
           <h2 className="text-center text-xl font-semibold m-2">{data.department_code} {data.course_code}</h2>
           <p className="text-center m-2">{data.description}</p>
+          {groups}
         </div>
         <div className="flex justify-center ">
           {courseRelationList}
           {relationships}
+        
         </div>
         </div>
     </main>
@@ -167,8 +170,25 @@ const populateRelationships = async (data: Course) => {
 }
 
 const getGroups = async (data: Course) => {
-  const groupNames = [];
+  let groupList:React.JSX.Element[] = [];
 
-  //TODO 
-  //add group relations inside course object
+  for (let i = 0; i < data.groups.length; i++) {
+    try {
+      const resp = await fetch(DB + "/groups/" + data.groups[i]);
+      const d: Group = await resp.json();
+
+      groupList.push(<li key={d.id}>{d.group_name}</li>)
+    } catch (err) {
+      console.log(err);
+    }
+  }
+  
+  return (
+    <div className="text-center">
+      <p>Part of these groups:</p>
+      <ul className="mb-4">
+        {groupList} 
+      </ul>
+    </div>
+  )
 }
