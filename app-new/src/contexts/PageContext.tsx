@@ -68,6 +68,15 @@ export interface Group {
   children: number[]
 }
 
+export interface User {
+  name: string,
+  rcsid: string,
+  //0 no perms (equivalent to no account), with no access to admin page
+  //1 admin (can modify all data except users)
+  //2 superadmin (can modify users)
+  perms: 0 | 1 | 2
+}
+
 export interface Link {
   id: number,
   link: string,

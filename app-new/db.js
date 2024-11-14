@@ -68,6 +68,16 @@ const groupsSchema = new mongoose.Schema({
 });
 const Group = mongoose.model('Group', groupsSchema);
 
+const usersSchema = new mongoose.Schema({
+  rcsid: String,
+  name: String,
+  perms: {
+    type: [Number],    
+    enum: [0, 1, 2]
+  }
+});
+const User = mongoose.model('User', usersSchema)
+
 mongoose.connect(MONGO);
 
 /*
@@ -86,9 +96,8 @@ app.get('/concepts', async (req, res) => {
     res.send(data);
   } catch (err) {
     //console.log(err);
-  }
+  };
   
-  ;
 })
 
 app.post('/concepts', async (req, res) => {
@@ -756,13 +765,12 @@ app.get('/skills/:id', async (req, res) => {
   
   try {
     const data = await Skill.findOne({"id": id});
-    console.log(1, data);
+
     res.send(data);
   } catch (err) {
     //console.log(err);
-  }
-  
-  ;
+  };
+
 })
 
 app.post('/skills/:id', (req, res) => {
@@ -1019,22 +1027,20 @@ app.post('/groups', async (req, res) => {
   const children = req.body.children;
 
   try {
-    console.log(1)
+
     const group = new Group({
       "id": id,
       "group_name": name,
       "description": desc,
       "children": children
     })
-    console.log(2)
+
     await group.save();
-    console.log(3)
 
     await Promise.all(
       children.map(course => Course.updateOne({ 'id': course }, { $push: { groups: id } }))
     );
 
-    console.log(4)
     res.status(201);
     res.send({"Message": "Success!"});
   } catch (err) {
@@ -1087,10 +1093,8 @@ app.put('/groups/:id', async (req, res) => {
   
   try {
 
-    console.log(1)
     originalGroup = await Group.findOne({"id": id});
 
-    console.log(2)
     await Group.updateOne({"id": id}, {
       "id": id,
       "group_name": name,
@@ -1098,21 +1102,17 @@ app.put('/groups/:id', async (req, res) => {
       "children": children
     });
 
-    console.log(3)
     const addedChildren = children.filter(child => !originalGroup.children.includes(child));
     const removedChildren = originalGroup.children.filter(child => !children.includes(child));
     
-    console.log(4)
     await Promise.all(
       addedChildren.map(course => Course.updateOne({ 'id': course }, { $push: { groups: id } }))
     );
 
-    console.log(5)
     await Promise.all(
       removedChildren.map(course => Course.updateOne({ 'id': course }, { $pull: { groups: id } }))
     );
 
-    console.log(6)
     res.status(200);
     res.send({"Message": "Successfully updated!"});
     
@@ -1147,5 +1147,137 @@ app.delete('/groups/:id', async (req, res) => {
   };
 
 });
+
+
+
+app.get('/users', async (req, res) => {
+
+  try {
+
+    const data = await User.find({});
+    res.status(200);
+    res.send(data);
+
+  } catch (err) {
+
+    console.log(err);
+    res.status(500);
+    res.send(err);
+
+  }
+
+});
+
+app.post('/users', async (req, res) => {
+
+  const { rcsid, name, perms } = req.body;
+
+  try {
+
+    const user = new User({
+      "rcsid": rcsid,
+      "name": name,
+      "perms": perms
+    });
+
+    await user.save();
+    
+    res.status(201);
+    res.send({"Message": "Success!"});
+
+  } catch (err) {
+
+    console.log(err);
+    res.status(500);
+    res.send(err);
+
+  }
+
+});
+
+app.put('/users', async (req, res) => {
+  res.set("Allow", "GET, POST");
+  res.status(405);
+  res.send({"Message":"Method Not Allowed"});
+});
+
+app.delete('/users', async (req, res) => {
+  res.set("Allow", "GET, POST");
+  res.status(405);
+  res.send({"Message":"Method Not Allowed"});
+});
+
+
+app.get('/users/:id', async (req, res) => {
+
+  const id = req.params.id;
+
+  try {
+
+    const data = await User.findOne({"rcsid": id});
+    res.status(200);
+    res.send(data);
+
+  } catch (err) {
+
+    console.log(err);
+    res.status(500);
+    res.send(err);
+
+  }
+
+});
+
+app.post('/users', async (req, res) => {
+  res.set("Allow", "GET, PUT, DELETE");
+  res.status(405);
+  res.send({"Message":"Method Not Allowed"});
+});
+
+app.put('/users/:id', async (req, res) => {
+
+  const { rcsid, name, perms } = req.body;
+
+  try {
+
+    await User.updateOne({
+      "rcsid": rcsid,
+      "name": name,
+      "perms": perms
+    });
+    
+    res.status(200);
+    res.send({"Message": "Updated Successfully!"});
+
+  } catch (err) {
+
+    console.log(err);
+    res.status(500);
+    res.send(err);
+
+  }
+
+});
+
+app.delete('/users/:id', async (req, res) => {
+
+  const id = req.params.id;
+
+  try {
+
+    await User.deleteOne({"rcsid": id});
+    res.status(200);
+    res.send({"Message": "Deleted Successfully!"});
+
+  } catch (err) {
+
+    console.log(err);
+    res.status(500);
+    res.send(err);
+
+  }
+});
+
+
 
 module.exports = app;

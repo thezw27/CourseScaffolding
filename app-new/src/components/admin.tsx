@@ -6,11 +6,11 @@ import makeAnimated from 'react-select/animated';
 import Header from "../components/header";
 //import SelectSearch, { SelectedOptionValue } from 'react-select-search';
 //import 'react-select-search/style.css';
-import { Concept, Course, Skill, Group, Link, SelectOption } from '@/contexts/PageContext';
+import { Concept, Course, Skill, Group, User, Link, SelectOption } from '@/contexts/PageContext';
 
 const DB = process.env.NEXT_PUBLIC_DB;
 
-export default function Admin({data}:{data: [Course[], Skill[], Concept[], Group[]]}) {
+export default function Admin({data}:{data: [Course[], Skill[], Concept[], Group[], User[]]}) {
 
   const animatedComponents = makeAnimated();
   const customStyles = {
@@ -41,7 +41,7 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[], Group
   groupData.unshift(({ label: "New Group", value: groupData.length > 0 ? Math.max(...groupData.map(item => item.value)) + 1 : 0 }));
   
 
-  const [type, setType] = useState<'Courses' | 'Concepts' | 'Skills' | 'Groups'>('Courses');
+  const [type, setType] = useState<'Courses' | 'Concepts' | 'Skills' | 'Groups' | 'Users'>('Courses');
   const [form, setForm] = useState<React.JSX.Element>(<form></form>);
   const [resourceButton, setResourceButton] = useState<React.JSX.Element>(<div></div>);
   const [resourceMenuButton, setResourceMenuButton] = useState<React.JSX.Element>(<div></div>);
@@ -315,6 +315,9 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[], Group
         case 'Groups':
           i = 3;
           break;
+        case 'Users':
+          i = 4;
+          break;
         default:
           i = -1;
           break;
@@ -333,12 +336,15 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[], Group
         case 'Groups':
           i = 3;
           break;
+        case 'Users':
+          i = 4;
+          break;
         default:
           i = -1;
           break;
       }
     };
-    if (event == -1 && i >= 0) {
+    if (event == -1 && i >= 0 && i != 4) {
       const ids = data[i].map((item: { id: number }) => item.id);
       event = Math.max(...ids);
       event = event + 1;
