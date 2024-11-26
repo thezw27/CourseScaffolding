@@ -21,6 +21,12 @@ export interface SelectOption {
   value: number
 }
 
+export interface SelectOptionString {
+  label: string,
+  value: string
+}
+
+
 export interface Course {
   id: number,
   department_code: string,

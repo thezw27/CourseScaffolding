@@ -39,6 +39,7 @@ export default function AuthCheck({data}:{data: [Course[], Skill[], Concept[], G
 
   const handlePasswordSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    console.log(password, PW)
     if (password === PW) {
       //const token = jwt.sign({ user: 'admin' }, SECRET, { expiresIn: '1h' }); 
       //document.cookie = `token=${token}; path=/; max-age=${60 * 60};`; 

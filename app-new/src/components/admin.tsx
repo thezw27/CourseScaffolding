@@ -6,7 +6,7 @@ import makeAnimated from 'react-select/animated';
 import Header from "../components/header";
 //import SelectSearch, { SelectedOptionValue } from 'react-select-search';
 //import 'react-select-search/style.css';
-import { Concept, Course, Skill, Group, User, Link, SelectOption } from '@/contexts/PageContext';
+import { Concept, Course, Skill, Group, User, Link, SelectOption, SelectOptionString } from '@/contexts/PageContext';
 
 const DB = process.env.NEXT_PUBLIC_DB;
 
@@ -40,6 +40,10 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[], Group
     .sort((a, b) => a.label.localeCompare(b.label));
   groupData.unshift(({ label: "New Group", value: groupData.length > 0 ? Math.max(...groupData.map(item => item.value)) + 1 : 0 }));
   
+  const userData: SelectOptionString[] = data[4]
+    .map(({ rcsid, name } : { rcsid:string, name:string }) => ({ label: name, value: id }))
+    .sort((a, b) => a.label.localeCompare(b.label));
+  userData.unshift(({ label: "New User", value: "Enter RCSID" }))
 
   const [type, setType] = useState<'Courses' | 'Concepts' | 'Skills' | 'Groups' | 'Users'>('Courses');
   const [form, setForm] = useState<React.JSX.Element>(<form></form>);
@@ -64,7 +68,7 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[], Group
   const [resourceName, setResourceName] = useState<string>('');
   const [resourceLink, setResourceLink] = useState<string>('');
   const [resourceType, setResourceType] = useState<'video' | 'article'>('video');
-  const [options, setOptions] = useState<SelectOption[]>([]);
+  const [options, setOptions] = useState<SelectOption[] | SelectOptionString[]>([]);
   const [resourceEditToggle, setResourceEditToggle] = useState<'hidden' | 'block'>('hidden');
   const [children, setChildren] = useState<number[]>([]);
 
@@ -99,6 +103,10 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[], Group
     {
       label: "Groups",
       value: "Groups"
+    },
+    {
+      label: "Users",
+      value: "Users"
     }
   ]
 
@@ -656,7 +664,9 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[], Group
         )
         break;
         
-        default:
+      case 'Users':
+        setOptions(userData);
+      default:
         setForm(
           <p>Error!</p>
         )
