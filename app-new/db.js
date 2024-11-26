@@ -70,7 +70,7 @@ const Group = mongoose.model('Group', groupsSchema);
 
 const usersSchema = new mongoose.Schema({
   rcsid: String,
-  name: String,
+  id: Number,
   perms: {
     type: [Number],    
     enum: [0, 1, 2]
@@ -1170,13 +1170,13 @@ app.get('/users', async (req, res) => {
 
 app.post('/users', async (req, res) => {
 
-  const { rcsid, name, perms } = req.body;
+  const { rcsid, id, perms } = req.body;
 
   try {
 
     const user = new User({
       "rcsid": rcsid,
-      "name": name,
+      "id": id,
       "perms": perms
     });
 
@@ -1214,7 +1214,7 @@ app.get('/users/:id', async (req, res) => {
 
   try {
 
-    const data = await User.findOne({"rcsid": id});
+    const data = await User.findOne({"id": id});
     res.status(200);
     res.send(data);
 
@@ -1236,13 +1236,13 @@ app.post('/users', async (req, res) => {
 
 app.put('/users/:id', async (req, res) => {
 
-  const { rcsid, name, perms } = req.body;
+  const { rcsid, id, perms } = req.body;
 
   try {
 
     await User.updateOne({
       "rcsid": rcsid,
-      "name": name,
+      "id": id,
       "perms": perms
     });
     
@@ -1265,7 +1265,7 @@ app.delete('/users/:id', async (req, res) => {
 
   try {
 
-    await User.deleteOne({"rcsid": id});
+    await User.deleteOne({"id": id});
     res.status(200);
     res.send({"Message": "Deleted Successfully!"});
 

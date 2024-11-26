@@ -6,7 +6,7 @@ import makeAnimated from 'react-select/animated';
 import Header from "../components/header";
 //import SelectSearch, { SelectedOptionValue } from 'react-select-search';
 //import 'react-select-search/style.css';
-import { Concept, Course, Skill, Group, User, Link, SelectOption, SelectOptionString } from '@/contexts/PageContext';
+import { Concept, Course, Skill, Group, User, Link, SelectOption } from '@/contexts/PageContext';
 
 const DB = process.env.NEXT_PUBLIC_DB;
 
@@ -40,10 +40,10 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[], Group
     .sort((a, b) => a.label.localeCompare(b.label));
   groupData.unshift(({ label: "New Group", value: groupData.length > 0 ? Math.max(...groupData.map(item => item.value)) + 1 : 0 }));
   
-  const userData: SelectOptionString[] = data[4]
-    .map(({ rcsid, name } : { rcsid:string, name:string }) => ({ label: name, value: id }))
+  const userData: SelectOption[] = data[4]
+    .map(({ id, rcsid } : { id:number, rcsid:string }) => ({ label: rcsid, value: id }))
     .sort((a, b) => a.label.localeCompare(b.label));
-  userData.unshift(({ label: "New User", value: "Enter RCSID" }))
+  userData.unshift(({ label: "Enter RCSID", value: userData.length > 0 ? Math.max(...userData.map(item => item.value)) + 1 : 0 }))
 
   const [type, setType] = useState<'Courses' | 'Concepts' | 'Skills' | 'Groups' | 'Users'>('Courses');
   const [form, setForm] = useState<React.JSX.Element>(<form></form>);
@@ -68,9 +68,11 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[], Group
   const [resourceName, setResourceName] = useState<string>('');
   const [resourceLink, setResourceLink] = useState<string>('');
   const [resourceType, setResourceType] = useState<'video' | 'article'>('video');
-  const [options, setOptions] = useState<SelectOption[] | SelectOptionString[]>([]);
+  const [options, setOptions] = useState<SelectOption[]>([]);
   const [resourceEditToggle, setResourceEditToggle] = useState<'hidden' | 'block'>('hidden');
   const [children, setChildren] = useState<number[]>([]);
+  const [rcsid, setRCSID] = useState<string>("");
+  const [perms, setPerms] = useState<0 | 1 | 2>(0);
 
   const [reqConcepts, setReqConcepts] = useState<MultiValue<SelectOption>>([]);
   const [reqSkills, setReqSkills] = useState<MultiValue<SelectOption>>([]);
@@ -107,6 +109,21 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[], Group
     {
       label: "Users",
       value: "Users"
+    }
+  ]
+
+  const permOptions = [
+    {
+      label: "No Access",
+      value: "0"
+    },
+    {
+      label: "Admin",
+      value: "1"
+    },
+    {
+      label: "Super Admin",
+      value: "2"
     }
   ]
 
@@ -171,10 +188,18 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[], Group
           "desc": desc,
           "children": children
         }
+      } else if (type == "Users") {
+        reqData = {
+          "id": id,
+          "rcsid": rcsid,
+          "perms": perms
+        }
+      console.log('1' , reqData)
       }
     }
     
     if (reqType == "create") {
+      console.log('2', reqData)
       fetch(DB + '/' + type.toLowerCase(), {
         method: 'POST',
         headers: {
@@ -352,7 +377,7 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[], Group
           break;
       }
     };
-    if (event == -1 && i >= 0 && i != 4) {
+    if (event == -1 && i >= 0) {
       const ids = data[i].map((item: { id: number }) => item.id);
       event = Math.max(...ids);
       event = event + 1;
@@ -380,13 +405,11 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[], Group
       setResourceLink('');
       setResourceType('video');
       setChildren([]);
+      setRCSID("");
       
       toggleResourceMenuButton(0);
 
     } else {
-      console.log('hello');
-      console.log(data[i].find(obj => obj.id === event))
-      setDesc(data[i].find(obj => obj.id === event)!.description);
       setId(data[i].find(obj => obj.id === event)!.id);
       setButtonType("exists");
       
@@ -396,6 +419,7 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[], Group
         setName(data[i].find(obj => obj.id === event)!.course_name);
         setDeptcode(data[i].find(obj => obj.id === event)!.department_code);
         setCoursecode(data[i].find(obj => obj.id === event)!.course_code);
+        setDesc(data[i].find(obj => obj.id === event)!.description);
         setConcepts(data[i].find(obj => obj.id === event)!.concepts.map(id => conceptData.find(c => c.value === id)).filter((c): c is SelectOption => c !== undefined));
         setSkills(data[i].find(obj => obj.id === event)!.skills.map(id => skillData.find(c => c.value === id)).filter((c): c is SelectOption => c !== undefined));
         setReqConcepts(data[i].find(obj => obj.id === event)!.requiredConcepts.map(id => conceptData.find(c => c.value === id)).filter((c): c is SelectOption => c !== undefined));
@@ -405,6 +429,7 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[], Group
         setFollowups(data[i].find(obj => obj.id === event)!.followups.map(id => courseData.find(c => c.value === id)).filter((c): c is SelectOption => c !== undefined));
       } else if (i == 1) {
         setName(data[i].find(obj => obj.id === event)!.skill_name);
+        setDesc(data[i].find(obj => obj.id === event)!.description);
         setConcepts(data[i].find(obj => obj.id === event)!.concepts.map(id => conceptData.find(c => c.value === id)).filter((c): c is SelectOption => c !== undefined));
         setCourses(data[i].find(obj => obj.id === event)!.courses.map(id => courseData.find(c => c.value === id)).filter((c): c is SelectOption => c !== undefined));
         setPrereqs(data[i].find(obj => obj.id === event)!.prereqs.map(id => skillData.find(c => c.value === id)).filter((c): c is SelectOption => c !== undefined));
@@ -418,6 +443,7 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[], Group
         })));
       } else if (i == 2) {
         setName(data[i].find(obj => obj.id === event)!.concept_name);
+        setDesc(data[i].find(obj => obj.id === event)!.description);
         setSkills(data[i].find(obj => obj.id === event)!.skills.map(id => skillData.find(c => c.value === id)).filter((c): c is SelectOption => c !== undefined));
         setCourses(data[i].find(obj => obj.id === event)!.courses.map(id => courseData.find(c => c.value === id)).filter((c): c is SelectOption => c !== undefined));
         setPrereqs(data[i].find(obj => obj.id === event)!.prereqs.map(id => conceptData.find(c => c.value === id)).filter((c): c is SelectOption => c !== undefined));
@@ -432,7 +458,11 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[], Group
       } else if (i == 3) {
         setName(data[i].find(obj => obj.id === event)!.group_name);
         setDesc(data[i].find(obj => obj.id === event)!.description);
+        setDesc(data[i].find(obj => obj.id === event)!.description);
         setChildren(data[i].find(obj => obj.id === event)!.children);
+      } else if (i == 4) {
+        setRCSID(data[i].find(obj => obj.id === event)!.rcsid);
+        setPerms(data[i].find(obj => obj.id === event)!.perms);
       }
       setResourceName('');
       setResourceLink('');
@@ -502,6 +532,10 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[], Group
       )
     }
   }, [buttonType]);
+
+  useEffect(() => {
+    console.log(rcsid);
+  }, [rcsid])
 
   useEffect(() => {
     switch (type) {
@@ -663,9 +697,30 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[], Group
           </form>
         )
         break;
-        
       case 'Users':
+        console.log(userData)
         setOptions(userData);
+        setForm(
+            <form className="flex flex-col m-1" onSubmit={handleSubmit}>
+              
+              <Input name="RCSID" id="rcsid" setter={setRCSID} value={rcsid} />
+
+              <label htmlFor="perms">User Permissions</label>
+              <Select 
+                id="perms"
+                options={permOptions} 
+                defaultValue={permOptions[0]}
+                isSearchable={false}
+                onChange={(event) => {
+                  setPerms(parseInt(event!.value) as 0 | 1 | 2)
+                }}
+              />  
+
+              {button}
+
+            </form>
+        )
+        break;
       default:
         setForm(
           <p>Error!</p>
@@ -686,8 +741,8 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[], Group
   }, [type, form]);
 
   useEffect(() => {
-    //setObjVal(options[0]);
-    //console.log('n1o');
+    setObjVal(options[0]);
+    console.log('n1o');
   }, [options]);
 
   return (
@@ -701,8 +756,8 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[], Group
           defaultValue={menuOptions[0]}
           isSearchable={false}
           onChange={(event) => {
-            setType((event as { value: string }).value as "Courses" | "Concepts" | "Skills" | "Groups" );
-            updateFields(-1, (event as { value: string }).value as "Courses" | "Concepts" | "Skills" | "Groups");
+            setType((event as { value: string }).value as "Courses" | "Concepts" | "Skills" | "Groups" | "Users");
+            updateFields(-1, (event as { value: string }).value as "Courses" | "Concepts" | "Skills" | "Groups" | "Users");
           }}
         />
         <label htmlFor="objSelect">{type}</label>

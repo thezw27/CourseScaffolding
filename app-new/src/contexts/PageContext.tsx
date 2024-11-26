@@ -21,12 +21,6 @@ export interface SelectOption {
   value: number
 }
 
-export interface SelectOptionString {
-  label: string,
-  value: string
-}
-
-
 export interface Course {
   id: number,
   department_code: string,
@@ -75,7 +69,7 @@ export interface Group {
 }
 
 export interface User {
-  name: string,
+  id: number,
   rcsid: string,
   //0 no perms (equivalent to no account), with no access to admin page
   //1 admin (can modify all data except users)
