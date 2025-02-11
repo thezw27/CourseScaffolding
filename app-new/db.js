@@ -519,7 +519,7 @@ app.put('/courses/:id',  async (req, res) => {
   const skills = req.body.skills;
   const concepts = req.body.concepts;
   const reqskills = req.body.reqskills;
-  const reqconcepts = req.body.reqconceppts;
+  const reqconcepts = req.body.reqconcepts;
 
   try {
 
