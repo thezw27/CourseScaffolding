@@ -551,7 +551,7 @@ export default function Admin({data}:{data: [Course[], Skill[], Concept[], Group
 
               <div className="flex space-x-4 w-full">
                 <div className='w-1/2'>
-                  <label htmlFor="reqconceptSelect">Required Concepts</label>
+                  <label htmlFor="conceptSelect">Required Concepts</label>
                   <Select styles={customStyles} options={conceptData.slice(1)} value={reqConcepts} closeMenuOnSelect={false} components={animatedComponents} isMulti menuPlacement="top" onChange={(event) => {setReqConcepts(event)}}/>
                 </div>
                 <div className='w-1/2'>
